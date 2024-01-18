@@ -1,0 +1,2263 @@
+
+. 
+end of do-file
+
+. do "/var/folders/4g/6g4fqlm504q1dm_kjxcwwf0r0000gn/T//SD00268.000000"
+
+. clear all
+
+. 
+end of do-file
+
+. cd "/Users/medydcampos/Documents/LSE/AT/PB4A7 (Quantitative Applications)/Assignment
+> s"
+/Users/medydcampos/Documents/LSE/AT/PB4A7 (Quantitative Applications)/Assignments
+
+. do "/var/folders/4g/6g4fqlm504q1dm_kjxcwwf0r0000gn/T//SD00268.000000"
+
+. use reg_panes
+
+. 
+end of do-file
+
+. do "/var/folders/4g/6g4fqlm504q1dm_kjxcwwf0r0000gn/T//SD00268.000000"
+
+. /* Question 1
+> 
+> Create the variables for cut off, and the quadratic term for the running variable an
+> d produce two histograms of income (one as a discrete variable, one as a continuous)
+> . Explain the differences of the histograms. Recenter income around the cutoff. */
+. 
+. /* Generate the treatment variable and quadratic term */
+. 
+. generate treat = 0
+
+. replace treat = 1 if ind_reest<0.02 & ind_reest~=. 
+(1,768 real changes made)
+
+. generate ind_reest_sq = ind_reest^2
+
+. 
+. /* Recenter the running variable */
+. 
+. replace ind_reest=ind_reest-0.02
+(3,098 real changes made)
+
+. 
+. /* Now, let's make the histograms. */
+. 
+. histogram ind_reest, discrete width(0.0001) ytitle(Frequency) xtitle(Predicted Incom
+> e) xline(0)title(Replicating predicted income on Manacorda et al. (Figure A2)) subti
+> tle(Proportion of households with different scores levels) note(Discrete histogram)
+(start=-.01999099, width=.0001)
+
+. 
+. histogram ind_reest, width(0.0001) ytitle(Frequency) xtitle(Predicted Income) xline(
+> 0) title(Replicating predicted income on Manacorda et al. (Figure A2)) subtitle(Prop
+> ortion of households with different scores levels) note(Continuous histogram)
+(bin=399, start=-.01999099, width=.0001)
+
+. 
+. /* The graphs show that "there is no indication that households just below the eligi
+> bility threshold are overrepresented relative to those just ineligible." (Manacorda 
+> et al., p. 14). 
+> 
+> Both graphs does not show much difference. 
+> When running the discrete command, you are treating "predicted income" as a categori
+> cal 
+> variable. Running the continuous command means that "predicted income" is continuous
+> . 
+> The continuous command should be more suitable for predicted income scores. */
+. 
+. rddensity ind_reest, c(0) plot
+Computing data-driven bandwidth selectors.
+
+Point estimates and standard errors have been adjusted for repeated observations.
+(Use option nomasspoints to suppress this adjustment.)
+
+RD Manipulation test using local polynomial density estimation.
+
+     c =     0.000 | Left of c  Right of c          Number of obs =         3098
+-------------------+----------------------          Model         = unrestricted
+     Number of obs |      1768        1330          BW method     =         comb
+Eff. Number of obs |       544         416          Kernel        =   triangular
+    Order est. (p) |         2           2          VCE method    =    jackknife
+    Order bias (q) |         3           3
+       BW est. (h) |     0.006       0.007
+
+Running variable: ind_reest.
+------------------------------------------
+            Method |      T          P>|T|
+-------------------+----------------------
+            Robust |   -0.8215      0.4114
+------------------------------------------
+
+P-values of binomial tests. (H0: prob = .5)
+-----------------------------------------------------
+ Window Length / 2 |       <c         >=c |     P>|T|
+-------------------+----------------------+----------
+             0.000 |        4          16 |    0.0118
+             0.001 |       24          47 |    0.0086
+             0.001 |       73          67 |    0.6728
+             0.002 |      117          84 |    0.0238
+             0.002 |      169         119 |    0.0038
+             0.002 |      229         158 |    0.0004
+             0.003 |      263         175 |    0.0000
+             0.003 |      303         193 |    0.0000
+             0.004 |      345         212 |    0.0000
+             0.004 |      376         232 |    0.0000
+-----------------------------------------------------
+
+. 
+. /* H0: There is continuity.
+> 
+> We want to fail in rejecting the null. 
+> If p-value is high, than we cannot reject the hypothesis of having continuity 
+> without treatment. 
+> 
+> P-value = 0.4114 > 0.05.
+> We cannot reject the null. 
+> 
+> If I didn't have the treatment, data would be continuous. 
+> Data is DESCONTINUOUS because of treatment. 
+> 
+> Conclusion: we have evidence to presume that the descontinuity is due to PANES
+> eligibility. Being eligible to PANES has an effect on political support for the
+> government. Histograms show evidence that households are randomly assigned to each
+> side of the threshold. */
+. 
+. /* Question 2: come back. 
+> 
+> Running regressions on covariates (provided in .do file) to see if there is a jump i
+> n average values for each of these at the cutoff and explain the results. What can w
+> e say about covariates balance? */ 
+. 
+. reg bl_hhsize treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02, robust
+
+Linear regression                               Number of obs     =      3,098
+                                                F(3, 3094)        =      23.82
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0216
+                                                Root MSE          =     1.6281
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+        bl_hhsize | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |  -.2727381   .1227306    -2.22   0.026    -.5133799   -.0320963
+        ind_reest |  -40.73083    7.96068    -5.12   0.000    -56.33958   -25.12208
+                  |
+treat#c.ind_reest |
+               1  |   21.85815   10.28289     2.13   0.034     1.696163    42.02014
+                  |
+            _cons |   3.345159   .0976185    34.27   0.000     3.153756    3.536563
+-----------------------------------------------------------------------------------
+
+. cmogram bl_hhsize ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatter line
+> (0) lfitci
+
+Plotting mean of bl_hhsize, conditional on ind_reest.
+
+n = 3098
+
+Bin #1: [-.0199909936636686,-.0193715251075446] (n = 58) (mean = 3.086206896551724)
+Bin #2: (-.0193715251075446,-.0187520565514206] (n = 46) (mean = 3.217391304347826)
+Bin #3: (-.0187520565514206,-.0181325879952966] (n = 60) (mean = 3.233333333333333)
+Bin #4: (-.0181325879952966,-.0175131194391726] (n = 58) (mean = 3.396551724137931)
+Bin #5: (-.0175131194391726,-.0168936508830486] (n = 47) (mean = 3.957446808510638)
+Bin #6: (-.0168936508830486,-.0162741823269246] (n = 34) (mean = 3.529411764705882)
+Bin #7: (-.0162741823269246,-.0156547137708006] (n = 77) (mean = 2.857142857142857)
+Bin #8: (-.0156547137708006,-.0150352452146766] (n = 70) (mean = 3.085714285714286)
+Bin #9: (-.0150352452146766,-.0144157766585526] (n = 58) (mean = 3.46551724137931)
+Bin #10: (-.0144157766585526,-.0137963081024286] (n = 59) (mean = 3.915254237288135)
+Bin #11: (-.0137963081024286,-.0131768395463046] (n = 51) (mean = 3.470588235294118)
+Bin #12: (-.0131768395463046,-.0125573709901806] (n = 48) (mean = 3.520833333333333)
+Bin #13: (-.0125573709901806,-.0119379024340566] (n = 43) (mean = 4.069767441860465)
+Bin #14: (-.0119379024340566,-.0113184338779326] (n = 59) (mean = 2.949152542372881)
+Bin #15: (-.0113184338779326,-.0106989653218086] (n = 66) (mean = 2.893939393939394)
+Bin #16: (-.0106989653218086,-.0100794967656846] (n = 49) (mean = 3.673469387755102)
+Bin #17: (-.0100794967656846,-.0094600282095606] (n = 54) (mean = 3.592592592592593)
+Bin #18: (-.0094600282095606,-.0088405596534366] (n = 43) (mean = 3.627906976744186)
+Bin #19: (-.0088405596534366,-.0082210910973126] (n = 52) (mean = 3.346153846153846)
+Bin #20: (-.0082210910973126,-.0076016225411886] (n = 47) (mean = 3.106382978723404)
+Bin #21: (-.0076016225411886,-.0069821539850646] (n = 36) (mean = 3.777777777777778)
+Bin #22: (-.0069821539850646,-.0063626854289406] (n = 70) (mean = 3.128571428571429)
+Bin #23: (-.0063626854289406,-.0057432168728166] (n = 56) (mean = 2.660714285714286)
+Bin #24: (-.0057432168728166,-.0051237483166926] (n = 56) (mean = 3.660714285714286)
+Bin #25: (-.0051237483166926,-.0045042797605686] (n = 67) (mean = 3.298507462686567)
+Bin #26: (-.0045042797605686,-.0038848112044446] (n = 42) (mean = 3.119047619047619)
+Bin #27: (-.0038848112044446,-.0032653426483206] (n = 59) (mean = 3.152542372881356)
+Bin #28: (-.0032653426483206,-.0026458740921966] (n = 63) (mean = 3.111111111111111)
+Bin #29: (-.0026458740921966,-.0020264055360726] (n = 76) (mean = 2.75)
+Bin #30: (-.0020264055360726,-.0014069369799486] (n = 70) (mean = 2.857142857142857)
+Bin #31: (-.0014069369799486,-.0007874684238246] (n = 71) (mean = 3.028169014084507)
+Bin #32: (-.0007874684238246,-.0001679998676991] (n = 22) (mean = 3.090909090909091)
+Bin #1: [0,.0006416775286198] (n = 32) (mean = 3.9375)
+Bin #2: (.0006416775286198,.0012833550572396] (n = 40) (mean = 2.925)
+Bin #3: (.0012833550572396,.0019250325858594] (n = 39) (mean = 3.153846153846154)
+Bin #4: (.0019250325858594,.0025667101144792] (n = 52) (mean = 3.057692307692307)
+Bin #5: (.0025667101144792,.003208387643099] (n = 29) (mean = 3.03448275862069)
+Bin #6: (.003208387643099,.0038500651717188] (n = 31) (mean = 3.387096774193548)
+Bin #7: (.0038500651717188,.0044917427003386] (n = 34) (mean = 3.647058823529412)
+Bin #8: (.0044917427003386,.0051334202289584] (n = 54) (mean = 2.87037037037037)
+Bin #9: (.0051334202289584,.0057750977575782] (n = 32) (mean = 3.875)
+Bin #10: (.0057750977575782,.006416775286198] (n = 37) (mean = 3.216216216216216)
+Bin #11: (.006416775286198,.0070584528148178] (n = 55) (mean = 2.490909090909091)
+Bin #12: (.0070584528148178,.0077001303434376] (n = 31) (mean = 3.483870967741935)
+Bin #13: (.0077001303434376,.0083418078720574] (n = 45) (mean = 3.022222222222222)
+Bin #14: (.0083418078720574,.0089834854006772] (n = 63) (mean = 2.142857142857143)
+Bin #15: (.0089834854006772,.009625162929297] (n = 34) (mean = 3.529411764705882)
+Bin #16: (.009625162929297,.0102668404579168] (n = 35) (mean = 3.028571428571428)
+Bin #17: (.0102668404579168,.0109085179865366] (n = 39) (mean = 2.897435897435897)
+Bin #18: (.0109085179865366,.0115501955151564] (n = 44) (mean = 3.363636363636364)
+Bin #19: (.0115501955151564,.0121918730437762] (n = 42) (mean = 2.690476190476191)
+Bin #20: (.0121918730437762,.012833550572396] (n = 40) (mean = 3.55)
+Bin #21: (.012833550572396,.0134752281010158] (n = 51) (mean = 2.529411764705882)
+Bin #22: (.0134752281010158,.0141169056296356] (n = 41) (mean = 3.121951219512195)
+Bin #23: (.0141169056296356,.0147585831582554] (n = 38) (mean = 3.026315789473684)
+Bin #24: (.0147585831582554,.0154002606868752] (n = 52) (mean = 2.557692307692307)
+Bin #25: (.0154002606868752,.016041938215495] (n = 52) (mean = 2.557692307692307)
+Bin #26: (.016041938215495,.0166836157441148] (n = 37) (mean = 3.27027027027027)
+Bin #27: (.0166836157441148,.0173252932727346] (n = 39) (mean = 3.205128205128205)
+Bin #28: (.0173252932727346,.0179669708013544] (n = 49) (mean = 2.877551020408163)
+Bin #29: (.0179669708013544,.0186086483299742] (n = 88) (mean = 1.920454545454545)
+Bin #30: (.0186086483299742,.019250325858594] (n = 53) (mean = 2.320754716981132)
+Bin #31: (.019250325858594,.0198920033872128] (n = 22) (mean = 3.136363636363636)
+
+. outreg2 using covariance_results.tex, replace
+covariance_results.tex
+dir : seeout
+
+. 
+. reg hhsize treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02, robust /* With th
+> e variable 
+> "hhsize" we find the coefficient reported on the paper (-0.350), and it is negative 
+> and significant. */ 
+
+Linear regression                               Number of obs     =      2,232
+                                                F(3, 2228)        =      15.86
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0203
+                                                Root MSE          =     1.6621
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+           hhsize | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |  -.3497425   .1466366    -2.39   0.017    -.6373011   -.0621839
+        ind_reest |  -44.48265     9.6762    -4.60   0.000    -63.45796   -25.50734
+                  |
+treat#c.ind_reest |
+               1  |   25.38735   12.32087     2.06   0.039      1.22577    49.54894
+                  |
+            _cons |   3.487887   .1168008    29.86   0.000     3.258837    3.716936
+-----------------------------------------------------------------------------------
+
+. describe
+
+Contains data from reg_panes.dta
+ Observations:         3,098                  
+    Variables:            77                  6 Dec 2023 09:58
+--------------------------------------------------------------------------------------
+Variable      Storage   Display    Value
+    name         type    format    label      Variable label
+--------------------------------------------------------------------------------------
+numformulario   long    %12.0g                
+sexo            long    %8.0g      sexo       sexo
+ind_reest       float   %9.0g                 
+muestra         float   %9.0g                 
+aprobado        float   %9.0g                 
+lnytoth07_pc    float   %9.0g                 
+lnbl_ytoth_pc   float   %9.0g                 
+untracked07     float   %9.0g                 
+untracked08     float   %9.0g                 
+h_86            byte    %8.0g      h_86        calificación de la situación actual de
+                                                ud. y su hogar
+h_89            byte    %8.0g      h_89        comparación entre el gobierno actual y
+                                                anterior
+k_112_1         byte    %8.0g      k_112_1     hay gente que cobra el panes que no lo
+                                                necesita
+k_112_3         byte    %8.0g      k_112_3     se debería cobrar menos y entregar más
+                                                alimentos
+k_112_4         byte    %8.0g      k_112_4     hay gente que necesita el panes y no lo
+                                                cobra
+bl_meduc        float   %9.0g                 (mean) bl_meduc
+bl_medad        float   %8.0g                 (mean) edad
+bl_hhsize       float   %9.0g                 (mean) hhsize
+j_98            byte    %8.0g      j_98        voto en las elecciones nacionales
+                                                pasadas
+edad            long    %8.0g                  edad del participante
+aniosed07       float   %9.0g                 
+hv2             byte    %8.0g      p2         78. ¿este hogar recibe canasta de
+                                                alimentos?
+hv25            byte    %8.0g      p25        tarjeta de alimentos
+hv32            byte    %8.0g      p32        82. en el próximo año ¿cree que
+ la
+                                                situación del país mejorará, se
+
+                                                mantendrá
+hv33            byte    %8.0g      p33        83. en el próximo año, ¿cree que
+ su
+                                                situación y la de su hogar 
+mejorará,
+                                                se
+hv34            byte    %8.0g      p34        84. en relación al gobierno anterior,
+                                                ¿cree que el gobierno actual es...?
+hv36            byte    %8.0g      p36        86. ¿y ud. cree que las diferencias
+                                                sociales en uy. son mayores, menor
+hv37            byte    %8.0g      p37        87. ¿ud. cree que una persona 
+
+                                                "humilde" trabajando duro puede 
+ l
+hv178           byte    %8.0g      p178       94. a nivel general, ¿que le pareció el
+                                                plan 
+ de emergencia?
+hv192           byte    %8.0g      p192       107. a nivel general, ¿ud. cree qu el
+                                                plan de equidad es...?
+hv195           byte    %8.0g      p195       a. partidos políticos
+hv196           byte    %8.0g      p196       b. el presidente
+hv197           byte    %8.0g      p197       c. bps
+hv198           byte    %8.0g      p198       d. ministero de desarrollo social
+hv2001          byte    %8.0g      p2001      f. el parlamento
+hv201           byte    %8.0g      p201       g. las intendencias
+hv208           byte    %8.0g      p208       112. ¿cuán orgulloso está ud. de ser
+                                                uruguayo?
+hv209           byte    %8.0g      p209       113. ¿qué tan interesado está ud. en la
+                                                política?
+lnytoth08_pc    float   %9.0g                 
+durables        float   %9.0g                 
+montobps_pe08   float   %9.0g                 
+sample          float   %9.0g                 
+misssexo        float   %9.0g                 
+missedad        float   %9.0g                 
+missaniosed     float   %9.0g                 
+missbl_medad    float   %9.0g                 
+misslnbl_ytot~c float   %9.0g                 
+missbl_hhsize   float   %9.0g                 
+missbl_meduc    float   %9.0g                 
+geo             float   %9.0g                 group(bl_localidad a_dpto)
+ind_reest2      float   %9.0g                 
+ind_reest3      float   %9.0g                 
+ind_reest4      float   %9.0g                 
+log_income      float   %9.0g                 
+aved            float   %9.0g                 
+hhsize          float   %9.0g                 
+female          float   %9.0g                 
+respondent_ed   float   %9.0g                 
+respondent_age  float   %9.0g                 
+no_response07   float   %9.0g                 
+no_response08   float   %9.0g                 
+voted           float   %9.0g                 
+support_go~2007 float   %9.0g                 
+support_go~2008 float   %9.0g                 
+received_panes  float   %9.0g                 
+ave_age         float   %9.0g                 
+opinion_panes   float   %9.0g                 
+opinion_pe      float   %9.0g                 
+confidence_MI~S float   %9.0g                 
+confidence_pr~t float   %9.0g                 
+confidence_pa~s float   %9.0g                 
+confidence_BPS  float   %9.0g                 
+confidence_in~s float   %9.0g                 
+confidence_pa~t float   %9.0g                 
+pride           float   %9.0g                 
+interest_poli~s float   %9.0g                 
+treat           float   %9.0g                 
+ind_reest_sq    float   %9.0g                 
+--------------------------------------------------------------------------------------
+Sorted by: 
+     Note: Dataset has changed since last saved.
+
+. cmogram hhsize ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatter line(0)
+>  lfitci
+
+Plotting mean of hhsize, conditional on ind_reest.
+
+n = 2232
+
+Bin #1: [-.0199909936636686,-.0193545099849166] (n = 45) (mean = 3.155555555555555)
+Bin #2: (-.0193545099849166,-.0187180263061646] (n = 30) (mean = 3.233333333333333)
+Bin #3: (-.0187180263061646,-.0180815426274126] (n = 45) (mean = 3.155555555555555)
+Bin #4: (-.0180815426274126,-.0174450589486606] (n = 44) (mean = 3.386363636363636)
+Bin #5: (-.0174450589486606,-.0168085752699086] (n = 33) (mean = 4.060606060606061)
+Bin #6: (-.0168085752699086,-.0161720915911566] (n = 42) (mean = 3.380952380952381)
+Bin #7: (-.0161720915911566,-.0155356079124046] (n = 61) (mean = 3.032786885245902)
+Bin #8: (-.0155356079124046,-.0148991242336526] (n = 44) (mean = 2.977272727272727)
+Bin #9: (-.0148991242336526,-.0142626405549006] (n = 48) (mean = 3.6875)
+Bin #10: (-.0142626405549006,-.0136261568761486] (n = 49) (mean = 3.857142857142857)
+Bin #11: (-.0136261568761486,-.0129896731973966] (n = 38) (mean = 3.184210526315789)
+Bin #12: (-.0129896731973966,-.0123531895186446] (n = 43) (mean = 4.093023255813954)
+Bin #13: (-.0123531895186446,-.0117167058398926] (n = 28) (mean = 3.678571428571428)
+Bin #14: (-.0117167058398926,-.0110802221611406] (n = 39) (mean = 3.333333333333333)
+Bin #15: (-.0110802221611406,-.0104437384823886] (n = 47) (mean = 3.297872340425532)
+Bin #16: (-.0104437384823886,-.0098072548036366] (n = 40) (mean = 3.725)
+Bin #17: (-.0098072548036366,-.0091707711248846] (n = 29) (mean = 3.586206896551724)
+Bin #18: (-.0091707711248846,-.0085342874461326] (n = 28) (mean = 3.857142857142857)
+Bin #19: (-.0085342874461326,-.0078978037673806] (n = 44) (mean = 3.386363636363636)
+Bin #20: (-.0078978037673806,-.0072613200886286] (n = 30) (mean = 3.6)
+Bin #21: (-.0072613200886286,-.0066248364098766] (n = 36) (mean = 3.5)
+Bin #22: (-.0066248364098766,-.0059883527311246] (n = 50) (mean = 2.88)
+Bin #23: (-.0059883527311246,-.0053518690523726] (n = 35) (mean = 3.371428571428571)
+Bin #24: (-.0053518690523726,-.0047153853736206] (n = 49) (mean = 3.448979591836735)
+Bin #25: (-.0047153853736206,-.0040789016948686] (n = 38) (mean = 3.210526315789474)
+Bin #26: (-.0040789016948686,-.0034424180161166] (n = 47) (mean = 3.191489361702128)
+Bin #27: (-.0034424180161166,-.0028059343373646] (n = 32) (mean = 3.375)
+Bin #28: (-.0028059343373646,-.0021694506586126] (n = 42) (mean = 3)
+Bin #29: (-.0021694506586126,-.0015329669798606] (n = 70) (mean = 2.5)
+Bin #30: (-.0015329669798606,-.0008964833011086] (n = 48) (mean = 3.145833333333333)
+Bin #31: (-.0008964833011086,-.000259999622358] (n = 14) (mean = 3.357142857142857)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = 4.03448275862069)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 25) (mean = 3.16)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 34) (mean = 3.676470588235294)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 31) (mean = 2.806451612903226)
+Bin #5: (.0027437246051328,.003429655756416] (n = 27) (mean = 3.592592592592593)
+Bin #6: (.003429655756416,.0041155869076992] (n = 20) (mean = 3.3)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = 2.972972972972973)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 37) (mean = 3.648648648648649)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 35) (mean = 3.685714285714285)
+Bin #10: (.0061733803615488,.006859311512832] (n = 35) (mean = 2.371428571428571)
+Bin #11: (.006859311512832,.0075452426641152] (n = 27) (mean = 3.703703703703704)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 40) (mean = 3.075)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 45) (mean = 2.155555555555555)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 31) (mean = 3.451612903225806)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = 2.928571428571428)
+Bin #16: (.010288967269248,.0109748984205312] (n = 31) (mean = 3.096774193548387)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 37) (mean = 3.324324324324324)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 36) (mean = 2.722222222222222)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 29) (mean = 3.241379310344827)
+Bin #20: (.0130326918743808,.013718623025664] (n = 40) (mean = 2.775)
+Bin #21: (.013718623025664,.0144045541769472] (n = 21) (mean = 2.952380952380953)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 35) (mean = 3.2)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = 2.444444444444445)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 33) (mean = 3.545454545454545)
+Bin #25: (.0164623476307968,.01714827878208] (n = 27) (mean = 3.185185185185185)
+Bin #26: (.01714827878208,.0178342099333632] (n = 32) (mean = 3.21875)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 55) (mean = 2.163636363636364)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 51) (mean = 2.196078431372549)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 19) (mean = 3.157894736842105)
+
+. 
+. /* Comparing both cmograns, visually, it is possible to argue that there is random
+> assignment around the cut-off for household size. Both variables look balanced aroun
+> d the cut-off. */
+. 
+. reg sexo treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02 & sex != 999999, rob
+> ust
+
+Linear regression                               Number of obs     =      2,231
+                                                F(3, 2227)        =       7.07
+                                                Prob > F          =     0.0001
+                                                R-squared         =     0.0099
+                                                Root MSE          =     .43876
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+             sexo | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |  -.0254415    .038744    -0.66   0.511    -.1014195    .0505366
+        ind_reest |  -6.092516   2.579818    -2.36   0.018    -11.15161   -1.033417
+                  |
+treat#c.ind_reest |
+               1  |    2.86346   3.326522     0.86   0.389     -3.65995    9.386869
+                  |
+            _cons |    1.75918    .029536    59.56   0.000     1.701259    1.817101
+-----------------------------------------------------------------------------------
+
+. cmogram sexo ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatter line(0) l
+> fitci
+
+Plotting mean of sexo, conditional on ind_reest.
+
+n = 3098
+
+Bin #1: [-.0199909936636686,-.0193715251075446] (n = 58) (mean = 258621.6896551724)
+Bin #2: (-.0193715251075446,-.0187520565514206] (n = 46) (mean = 326087.8260869565)
+Bin #3: (-.0187520565514206,-.0181325879952966] (n = 60) (mean = 266667.8)
+Bin #4: (-.0181325879952966,-.0175131194391726] (n = 58) (mean = 258621.7068965517)
+Bin #5: (-.0175131194391726,-.0168936508830486] (n = 47) (mean = 255320.1914893617)
+Bin #6: (-.0168936508830486,-.0162741823269246] (n = 34) (mean = 205883.6176470588)
+Bin #7: (-.0162741823269246,-.0156547137708006] (n = 77) (mean = 233767.3116883117)
+Bin #8: (-.0156547137708006,-.0150352452146766] (n = 70) (mean = 214286.9)
+Bin #9: (-.0150352452146766,-.0144157766585526] (n = 58) (mean = 224139.1551724138)
+Bin #10: (-.0144157766585526,-.0137963081024286] (n = 59) (mean = 203391.1186440678)
+Bin #11: (-.0137963081024286,-.0131768395463046] (n = 51) (mean = 235295.2745098039)
+Bin #12: (-.0131768395463046,-.0125573709901806] (n = 48) (mean = 208334.4583333333)
+Bin #13: (-.0125573709901806,-.0119379024340566] (n = 43) (mean = 209303.6279069767)
+Bin #14: (-.0119379024340566,-.0113184338779326] (n = 59) (mean = 389831.186440678)
+Bin #15: (-.0113184338779326,-.0106989653218086] (n = 66) (mean = 318182.6666666667)
+Bin #16: (-.0106989653218086,-.0100794967656846] (n = 49) (mean = 204082.8775510204)
+Bin #17: (-.0100794967656846,-.0094600282095606] (n = 54) (mean = 314815.6851851852)
+Bin #18: (-.0094600282095606,-.0088405596534366] (n = 43) (mean = 488372.511627907)
+Bin #19: (-.0088405596534366,-.0082210910973126] (n = 52) (mean = 211539.6538461538)
+Bin #20: (-.0082210910973126,-.0076016225411886] (n = 47) (mean = 340426.4042553192)
+Bin #21: (-.0076016225411886,-.0069821539850646] (n = 36) (mean = 333334.1944444444)
+Bin #22: (-.0069821539850646,-.0063626854289406] (n = 70) (mean = 271429.6)
+Bin #23: (-.0063626854289406,-.0057432168728166] (n = 56) (mean = 321429.3035714286)
+Bin #24: (-.0057432168728166,-.0051237483166926] (n = 56) (mean = 232144)
+Bin #25: (-.0051237483166926,-.0045042797605686] (n = 67) (mean = 328359.0447761194)
+Bin #26: (-.0045042797605686,-.0038848112044446] (n = 42) (mean = 190477.4285714286)
+Bin #27: (-.0038848112044446,-.0032653426483206] (n = 59) (mean = 271187.3898305085)
+Bin #28: (-.0032653426483206,-.0026458740921966] (n = 63) (mean = 380953.0793650793)
+Bin #29: (-.0026458740921966,-.0020264055360726] (n = 76) (mean = 302632.5526315789)
+Bin #30: (-.0020264055360726,-.0014069369799486] (n = 70) (mean = 314286.5)
+Bin #31: (-.0014069369799486,-.0007874684238246] (n = 71) (mean = 338029.0281690141)
+Bin #32: (-.0007874684238246,-.0001679998676991] (n = 22) (mean = 454545.9545454545)
+Bin #1: [0,.0006416775286198] (n = 32) (mean = 125001.40625)
+Bin #2: (.0006416775286198,.0012833550572396] (n = 40) (mean = 400000.675)
+Bin #3: (.0012833550572396,.0019250325858594] (n = 39) (mean = 307693.2564102564)
+Bin #4: (.0019250325858594,.0025667101144792] (n = 52) (mean = 269231.75)
+Bin #5: (.0025667101144792,.003208387643099] (n = 29) (mean = 241380.4137931034)
+Bin #6: (.003208387643099,.0038500651717188] (n = 31) (mean = 322581.4838709678)
+Bin #7: (.0038500651717188,.0044917427003386] (n = 34) (mean = 205883.5882352941)
+Bin #8: (.0044917427003386,.0051334202289584] (n = 54) (mean = 277778.6851851852)
+Bin #9: (.0051334202289584,.0057750977575782] (n = 32) (mean = 187501.1875)
+Bin #10: (.0057750977575782,.006416775286198] (n = 37) (mean = 189190.4324324324)
+Bin #11: (.006416775286198,.0070584528148178] (n = 55) (mean = 236364.6727272727)
+Bin #12: (.0070584528148178,.0077001303434376] (n = 31) (mean = 290323.6451612903)
+Bin #13: (.0077001303434376,.0083418078720574] (n = 45) (mean = 244445.5111111111)
+Bin #14: (.0083418078720574,.0089834854006772] (n = 63) (mean = 301588.0317460318)
+Bin #15: (.0089834854006772,.009625162929297] (n = 34) (mean = 147060.1470588235)
+Bin #16: (.009625162929297,.0102668404579168] (n = 35) (mean = 257143.9714285714)
+Bin #17: (.0102668404579168,.0109085179865366] (n = 39) (mean = 230770.2564102564)
+Bin #18: (.0109085179865366,.0115501955151564] (n = 44) (mean = 204546.75)
+Bin #19: (.0115501955151564,.0121918730437762] (n = 42) (mean = 285715.0476190476)
+Bin #20: (.0121918730437762,.012833550572396] (n = 40) (mean = 325000.925)
+Bin #21: (.012833550572396,.0134752281010158] (n = 51) (mean = 235295.137254902)
+Bin #22: (.0134752281010158,.0141169056296356] (n = 41) (mean = 341464.1951219512)
+Bin #23: (.0141169056296356,.0147585831582554] (n = 38) (mean = 394737.5789473684)
+Bin #24: (.0147585831582554,.0154002606868752] (n = 52) (mean = 346154.5576923077)
+Bin #25: (.0154002606868752,.016041938215495] (n = 52) (mean = 346154.4807692308)
+Bin #26: (.016041938215495,.0166836157441148] (n = 37) (mean = 297298.2432432433)
+Bin #27: (.0166836157441148,.0173252932727346] (n = 39) (mean = 307693.2564102564)
+Bin #28: (.0173252932727346,.0179669708013544] (n = 49) (mean = 224490.9387755102)
+Bin #29: (.0179669708013544,.0186086483299742] (n = 88) (mean = 420454.9772727273)
+Bin #30: (.0186086483299742,.019250325858594] (n = 53) (mean = 150944.5471698113)
+Bin #31: (.019250325858594,.0198920033872128] (n = 22) (mean = 227274)
+
+. outreg2 using covariance_results.tex, append
+covariance_results.tex
+dir : seeout
+
+. 
+. /* Treatment is not statistic significant, so it is not predicting sex. 
+> There is no jump. */ 
+. 
+. /* Main conclusion? Don't know. 
+> For household size, the p-values are low but when running the cmogram, data don't lo
+> ok 
+> descontinuited. The paper actually relies on that. Figure A1 of online appendix actu
+> ally 
+> shows that. What looks like is that the authors judged as enough to only do a visual
+> isation of
+> data to argue that there is no discontinuity regarding covariates. Plus, when adding
+>  them to the model, they don't change the results that much, what gives extra eviden
+> ce to the random assignment 
+> around the cut-off. Is that enough? Don't know. Shouldn't they be running some tests
+> ? */
+. 
+. /* Doubts:
+> - Why running for covariates? 
+> In RDD analyses, regressions on covariates are used to control for the effects of va
+> riables that may be affecting the relationship between the treatment variable and th
+> e outcome variable. 
+> 
+> - What it means "covariates balance" and what those regressions are telling me about
+>  that? 
+> 
+> In statistics, covariate balance refers to the degree to which the distribution of c
+> ovariates is similar across levels of the treatment variable. Covariates are variabl
+> es that are associated with the outcome of interest, but are not the treatment itsel
+> f. 
+> Covariate balance is important because it ensures that the treatment effect that is 
+> estimated is not confounded by the distribution of covariates. */
+. 
+. 
+. /* Question 3 
+> Produce main results of the paper (with our dataset) using political support as depe
+> ndent variable.
+> A) Expand the window symmetricaly by 0.01.
+> B) Run the main results on 3 more dependent variables of your choice from the origin
+> al paper. Explain which ones you choose, why and then subsequently present the resul
+> ts. */ 
+. 
+. /* Running the regression in the -0.02/+0.02 range. */
+. 
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02, robust 
+
+Linear regression                               Number of obs     =      2,089
+                                                F(3, 2085)        =      34.57
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0506
+                                                Root MSE          =     .27992
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1096557   .0261292     4.20   0.000     .0584138    .1608977
+        ind_reest |  -.0108374   1.938318    -0.01   0.996    -3.812077    3.790402
+                  |
+treat#c.ind_reest |
+               1  |  -1.915529   2.244153    -0.85   0.393    -6.316544    2.485486
+                  |
+            _cons |    .772328   .0221399    34.88   0.000     .7289095    .8157466
+-----------------------------------------------------------------------------------
+
+. outreg2 using results.tex, replace
+results.tex
+dir : seeout
+
+. reg support_gov_2007 bl_hhsize sexo treat##c.ind_reest if ind_reest>=-.02 & ind_rees
+> t<=.02 & sex != 999999, cluster(ind_reest) 
+
+Linear regression                               Number of obs     =      2,088
+                                                F(5, 1560)        =      22.40
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0538
+                                                Root MSE          =     .27964
+
+                               (Std. err. adjusted for 1,561 clusters in ind_reest)
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+        bl_hhsize |     .00112   .0039412     0.28   0.776    -.0066106    .0088506
+             sexo |  -.0363127   .0143498    -2.53   0.011    -.0644595   -.0081658
+          1.treat |   .1094348   .0256643     4.26   0.000     .0590947    .1597749
+        ind_reest |  -.1532253   1.958013    -0.08   0.938    -3.993839    3.687389
+                  |
+treat#c.ind_reest |
+               1  |  -1.890289   2.207225    -0.86   0.392    -6.219728    2.439151
+                  |
+            _cons |   .8315737   .0342901    24.25   0.000      .764314    .8988333
+-----------------------------------------------------------------------------------
+
+. reg support_gov_2007 hhsize sexo treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=
+> .02 & sex != 999999, cluster(ind_reest) 
+
+Linear regression                               Number of obs     =      2,088
+                                                F(5, 1560)        =      22.40
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0538
+                                                Root MSE          =     .27964
+
+                               (Std. err. adjusted for 1,561 clusters in ind_reest)
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+           hhsize |     .00112   .0039412     0.28   0.776    -.0066106    .0088506
+             sexo |  -.0363127   .0143498    -2.53   0.011    -.0644595   -.0081658
+          1.treat |   .1094348   .0256643     4.26   0.000     .0590947    .1597749
+        ind_reest |  -.1532253   1.958013    -0.08   0.938    -3.993839    3.687389
+                  |
+treat#c.ind_reest |
+               1  |  -1.890289   2.207225    -0.86   0.392    -6.219728    2.439151
+                  |
+            _cons |   .8315737   .0342901    24.25   0.000      .764314    .8988333
+-----------------------------------------------------------------------------------
+
+. outreg2 using results_covariates.tex, replace
+results_covariates.tex
+dir : seeout
+
+. 
+. /* Being in the treatment group predicts the support for the government in 2007. 
+> Treatment group is equal 1 when your predict income score is less than 0.02.
+> This means that you are below the threshold, being eligible for PANES. 
+> The coefficient is positive, which means that support increases with being treated. 
+> */
+. 
+. reg support_gov_2007 treat##c.(ind_reest_sq) if ind_reest>=-0.02 & ind_reest<=.02, r
+> obust
+
+Linear regression                               Number of obs     =      2,089
+                                                F(3, 2085)        =      33.91
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0503
+                                                Root MSE          =     .27996
+
+--------------------------------------------------------------------------------
+               |               Robust
+support_g~2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+       1.treat |   .1389821   .0333235     4.17   0.000     .0736313    .2043329
+  ind_reest_sq |  -.4681959   32.27134    -0.01   0.988     -63.7556    62.81921
+               |
+         treat#|
+c.ind_reest_sq |
+            1  |  -77.27756   66.13481    -1.17   0.243    -206.9747    52.41957
+               |
+         _cons |   .7726622   .0318857    24.23   0.000     .7101311    .8351933
+--------------------------------------------------------------------------------
+
+. outreg2 using results.tex, append
+results.tex
+dir : seeout
+
+. reg support_gov_2007 bl_hhsize sexo treat##c.(ind_reest_sq) if ind_reest>=-0.02 & in
+> d_reest<=.02 & sex != 999999, cluster(ind_reest)
+
+Linear regression                               Number of obs     =      2,088
+                                                F(5, 1560)        =      22.08
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0535
+                                                Root MSE          =     .27968
+
+                            (Std. err. adjusted for 1,561 clusters in ind_reest)
+--------------------------------------------------------------------------------
+               |               Robust
+support_g~2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+     bl_hhsize |   .0010895   .0039503     0.28   0.783    -.0066589     .008838
+          sexo |  -.0362299   .0143403    -2.53   0.012    -.0643582   -.0081016
+       1.treat |   .1400175   .0335651     4.17   0.000       .07418     .205855
+  ind_reest_sq |  -2.780703   32.45656    -0.09   0.932    -66.44379    60.88238
+               |
+         treat#|
+c.ind_reest_sq |
+            1  |  -81.09953   61.98179    -1.31   0.191    -202.6759    40.47687
+               |
+         _cons |   .8325919   .0415117    20.06   0.000     .7511673    .9140165
+--------------------------------------------------------------------------------
+
+. outreg2 using results_covariates.tex, append
+results_covariates.tex
+dir : seeout
+
+. 
+. /* Adjusting the model for a quadratic term gives the same result.
+> Being in the treatment group predicts support for the government in 2007 at 5% confi
+> dence level (p-valeu = 0.001 < 0.05). */ 
+. 
+. 
+. /* 3A) Expand the window symmetricaly by 0.01.
+> New range: -0.03 / + 0.03. */
+. 
+. summarize ind_reest
+
+    Variable |        Obs        Mean    Std. dev.       Min        Max
+-------------+---------------------------------------------------------
+   ind_reest |      3,098   -.0012338    .0116339   -.019991    .019892
+
+. 
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.03 & ind_reest<=.03, robust
+
+Linear regression                               Number of obs     =      2,089
+                                                F(3, 2085)        =      34.57
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0506
+                                                Root MSE          =     .27992
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1096557   .0261292     4.20   0.000     .0584138    .1608977
+        ind_reest |  -.0108374   1.938318    -0.01   0.996    -3.812077    3.790402
+                  |
+treat#c.ind_reest |
+               1  |  -1.915529   2.244153    -0.85   0.393    -6.316544    2.485486
+                  |
+            _cons |    .772328   .0221399    34.88   0.000     .7289095    .8157466
+-----------------------------------------------------------------------------------
+
+. 
+. outreg2 using results_03.tex, replace
+results_03.tex
+dir : seeout
+
+. 
+. reg support_gov_2007 treat##c.(ind_reest_sq) if ind_reest>=-.03 & ind_reest<=.03, ro
+> bust
+
+Linear regression                               Number of obs     =      2,089
+                                                F(3, 2085)        =      33.91
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0503
+                                                Root MSE          =     .27996
+
+--------------------------------------------------------------------------------
+               |               Robust
+support_g~2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+       1.treat |   .1389821   .0333235     4.17   0.000     .0736313    .2043329
+  ind_reest_sq |  -.4681959   32.27134    -0.01   0.988     -63.7556    62.81921
+               |
+         treat#|
+c.ind_reest_sq |
+            1  |  -77.27756   66.13481    -1.17   0.243    -206.9747    52.41957
+               |
+         _cons |   .7726622   .0318857    24.23   0.000     .7101311    .8351933
+--------------------------------------------------------------------------------
+
+. 
+. outreg2 using results_03.tex, append
+results_03.tex
+dir : seeout
+
+. 
+. /* We don't have observations outside of the window of +0.02/-0.02. 
+> that's why this code does not change the x-axis. */
+. 
+. /* Let's run some graphs. */
+. 
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatt
+> er line(0)
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 2089
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 48) (mean = .9270833333333334)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .9565217391304348)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 44) (mean = .8863636363636364)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 47) (mean = .9042553191489362)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 28) (mean = .9821428571428571)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .9090909090909091)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 55) (mean = .9272727272727272)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .9302325581395349)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 49) (mean = .9183673469387755)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 46) (mean = .9565217391304348)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 39) (mean = .8589743589743589)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 38) (mean = .8947368421052632)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .8548387096774194)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 41) (mean = .8780487804878049)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .8170731707317073)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .9230769230769231)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 22) (mean = .8863636363636364)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 45) (mean = .8666666666666667)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .9)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 27) (mean = .8888888888888888)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 58) (mean = .9137931034482759)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 28) (mean = .9821428571428571)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 56) (mean = .8928571428571429)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 32) (mean = .953125)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 50) (mean = .83)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8870967741935484)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .9027777777777778)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 65) (mean = .9)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 49) (mean = .8673469387755102)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .9285714285714286)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = .7413793103448276)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 22) (mean = .8181818181818182)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .796875)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8461538461538461)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7608695652173914)
+Bin #6: (.003429655756416,.0041155869076992] (n = 16) (mean = .75)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = .7027027027027027)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 34) (mean = .7794117647058824)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .7794117647058824)
+Bin #10: (.0061733803615488,.006859311512832] (n = 28) (mean = .6785714285714286)
+Bin #11: (.006859311512832,.0075452426641152] (n = 26) (mean = .7115384615384616)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 38) (mean = .7631578947368421)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 40) (mean = .8375)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 29) (mean = .7931034482758621)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = .7321428571428571)
+Bin #16: (.010288967269248,.0109748984205312] (n = 30) (mean = .8166666666666667)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 31) (mean = .8225806451612904)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 33) (mean = .803030303030303)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .8076923076923077)
+Bin #20: (.0130326918743808,.013718623025664] (n = 37) (mean = .7837837837837838)
+Bin #21: (.013718623025664,.0144045541769472] (n = 19) (mean = .6842105263157895)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7647058823529411)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = .6944444444444444)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 31) (mean = .8064516129032258)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .7708333333333334)
+Bin #26: (.01714827878208,.0178342099333632] (n = 31) (mean = .7580645161290323)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .8645833333333334)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 49) (mean = .7142857142857143)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .75)
+
+. 
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatt
+> er line(0) lfitci
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 2089
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 48) (mean = .9270833333333334)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .9565217391304348)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 44) (mean = .8863636363636364)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 47) (mean = .9042553191489362)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 28) (mean = .9821428571428571)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .9090909090909091)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 55) (mean = .9272727272727272)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .9302325581395349)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 49) (mean = .9183673469387755)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 46) (mean = .9565217391304348)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 39) (mean = .8589743589743589)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 38) (mean = .8947368421052632)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .8548387096774194)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 41) (mean = .8780487804878049)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .8170731707317073)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .9230769230769231)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 22) (mean = .8863636363636364)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 45) (mean = .8666666666666667)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .9)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 27) (mean = .8888888888888888)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 58) (mean = .9137931034482759)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 28) (mean = .9821428571428571)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 56) (mean = .8928571428571429)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 32) (mean = .953125)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 50) (mean = .83)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8870967741935484)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .9027777777777778)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 65) (mean = .9)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 49) (mean = .8673469387755102)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .9285714285714286)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = .7413793103448276)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 22) (mean = .8181818181818182)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .796875)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8461538461538461)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7608695652173914)
+Bin #6: (.003429655756416,.0041155869076992] (n = 16) (mean = .75)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = .7027027027027027)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 34) (mean = .7794117647058824)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .7794117647058824)
+Bin #10: (.0061733803615488,.006859311512832] (n = 28) (mean = .6785714285714286)
+Bin #11: (.006859311512832,.0075452426641152] (n = 26) (mean = .7115384615384616)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 38) (mean = .7631578947368421)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 40) (mean = .8375)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 29) (mean = .7931034482758621)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = .7321428571428571)
+Bin #16: (.010288967269248,.0109748984205312] (n = 30) (mean = .8166666666666667)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 31) (mean = .8225806451612904)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 33) (mean = .803030303030303)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .8076923076923077)
+Bin #20: (.0130326918743808,.013718623025664] (n = 37) (mean = .7837837837837838)
+Bin #21: (.013718623025664,.0144045541769472] (n = 19) (mean = .6842105263157895)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7647058823529411)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = .6944444444444444)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 31) (mean = .8064516129032258)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .7708333333333334)
+Bin #26: (.01714827878208,.0178342099333632] (n = 31) (mean = .7580645161290323)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .8645833333333334)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 49) (mean = .7142857142857143)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .75)
+
+. /* lfitci adds a linear fit line to the scatter plot along with confidence intervals
+>  for the fitted line.*/ 
+. 
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatt
+> er line(0) qfitci
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 2089
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 48) (mean = .9270833333333334)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .9565217391304348)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 44) (mean = .8863636363636364)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 47) (mean = .9042553191489362)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 28) (mean = .9821428571428571)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .9090909090909091)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 55) (mean = .9272727272727272)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .9302325581395349)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 49) (mean = .9183673469387755)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 46) (mean = .9565217391304348)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 39) (mean = .8589743589743589)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 38) (mean = .8947368421052632)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .8548387096774194)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 41) (mean = .8780487804878049)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .8170731707317073)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .9230769230769231)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 22) (mean = .8863636363636364)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 45) (mean = .8666666666666667)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .9)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 27) (mean = .8888888888888888)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 58) (mean = .9137931034482759)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 28) (mean = .9821428571428571)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 56) (mean = .8928571428571429)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 32) (mean = .953125)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 50) (mean = .83)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8870967741935484)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .9027777777777778)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 65) (mean = .9)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 49) (mean = .8673469387755102)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .9285714285714286)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = .7413793103448276)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 22) (mean = .8181818181818182)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .796875)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8461538461538461)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7608695652173914)
+Bin #6: (.003429655756416,.0041155869076992] (n = 16) (mean = .75)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = .7027027027027027)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 34) (mean = .7794117647058824)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .7794117647058824)
+Bin #10: (.0061733803615488,.006859311512832] (n = 28) (mean = .6785714285714286)
+Bin #11: (.006859311512832,.0075452426641152] (n = 26) (mean = .7115384615384616)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 38) (mean = .7631578947368421)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 40) (mean = .8375)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 29) (mean = .7931034482758621)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = .7321428571428571)
+Bin #16: (.010288967269248,.0109748984205312] (n = 30) (mean = .8166666666666667)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 31) (mean = .8225806451612904)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 33) (mean = .803030303030303)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .8076923076923077)
+Bin #20: (.0130326918743808,.013718623025664] (n = 37) (mean = .7837837837837838)
+Bin #21: (.013718623025664,.0144045541769472] (n = 19) (mean = .6842105263157895)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7647058823529411)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = .6944444444444444)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 31) (mean = .8064516129032258)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .7708333333333334)
+Bin #26: (.01714827878208,.0178342099333632] (n = 31) (mean = .7580645161290323)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .8645833333333334)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 49) (mean = .7142857142857143)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .75)
+
+. 
+. /*qfitci adds a quadratic fit line to the scatter plot along with confidence interva
+> ls for the fitted curve.
+> 
+> The quadratic fit line is a curve that represents the best quadratic (second-degree 
+> polynomial) approximation of the relationship between the variables being plotted. T
+> he confidence intervals around the curve provide a graphical representation of the u
+> ncertainty associated with the estimated quadratic relationship. */ 
+.         
+. /* 3B) Run the main results on 3 more dependent variables. */
+. 
+. reg geo treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02, robust
+
+Linear regression                               Number of obs     =      3,098
+                                                F(3, 3094)        =       2.67
+                                                Prob > F          =     0.0457
+                                                R-squared         =     0.0025
+                                                Root MSE          =     15.155
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+              geo | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   2.090182    1.13973     1.83   0.067    -.1445225    4.324886
+        ind_reest |   111.3422   72.14143     1.54   0.123    -30.10771    252.7922
+                  |
+treat#c.ind_reest |
+               1  |   24.51703   95.34519     0.26   0.797    -162.4292    211.4633
+                  |
+            _cons |   16.71529   .8485887    19.70   0.000     15.05144    18.37915
+-----------------------------------------------------------------------------------
+
+. reg confidence_president treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02, rob
+> ust
+
+Linear regression                               Number of obs     =      1,937
+                                                F(3, 1933)        =      18.69
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0275
+                                                Root MSE          =     .37821
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+confidence_pres~t | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .0821507   .0359623     2.28   0.022     .0116216    .1526797
+        ind_reest |  -2.880483   2.271359    -1.27   0.205    -7.335055    1.574089
+                  |
+treat#c.ind_reest |
+               1  |   1.453377   3.030237     0.48   0.632      -4.4895    7.396254
+                  |
+            _cons |    .395656   .0271756    14.56   0.000     .3423595    .4489526
+-----------------------------------------------------------------------------------
+
+. outreg2 using results_extra.tex, replace
+results_extra.tex
+dir : seeout
+
+. 
+. /* Having an income prediction score below the threshold predicts confidence in the 
+> president. 
+> Coefficient is positive (0.082) and significant at 5% (p-value = 0.022). */
+. 
+. cmogram confidence_president ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) s
+> catter line(0) lfitci
+
+Plotting mean of confidence_president, conditional on ind_reest.
+
+n = 1937
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 43) (mean = .5465116279069767)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .5869565217391305)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 41) (mean = .3902439024390244)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 42) (mean = .5833333333333334)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 25) (mean = .46)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 43) (mean = .5813953488372093)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 51) (mean = .5784313725490197)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 40) (mean = .4)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 50) (mean = .5)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 42) (mean = .4523809523809524)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 36) (mean = .5555555555555556)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 39) (mean = .4871794871794872)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 30) (mean = .4333333333333333)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 33) (mean = .4242424242424243)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 39) (mean = .3846153846153846)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 38) (mean = .5789473684210527)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 20) (mean = .45)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 42) (mean = .4642857142857143)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .4666666666666667)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 22) (mean = .4545454545454545)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 51) (mean = .4607843137254902)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 26) (mean = .5961538461538461)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 47) (mean = .4680851063829787)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 31) (mean = .4354838709677419)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 46) (mean = .4565217391304348)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 33) (mean = .3939393939393939)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .5694444444444444)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 54) (mean = .5925925925925926)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 51) (mean = .4509803921568628)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 13) (mean = .5384615384615384)
+Bin #1: [0,.0007104286924005] (n = 30) (mean = .45)
+Bin #2: (.0007104286924005,.001420857384801] (n = 20) (mean = .375)
+Bin #3: (.001420857384801,.0021312860772015] (n = 32) (mean = .390625)
+Bin #4: (.0021312860772015,.002841714769602] (n = 27) (mean = .4444444444444444)
+Bin #5: (.002841714769602,.0035521434620025] (n = 22) (mean = .4545454545454545)
+Bin #6: (.0035521434620025,.004262572154403] (n = 25) (mean = .32)
+Bin #7: (.004262572154403,.0049730008468035] (n = 34) (mean = .3235294117647059)
+Bin #8: (.0049730008468035,.005683429539204] (n = 20) (mean = .2)
+Bin #9: (.005683429539204,.0063938582316045] (n = 35) (mean = .3571428571428572)
+Bin #10: (.0063938582316045,.007104286924005] (n = 36) (mean = .4027777777777778)
+Bin #11: (.007104286924005,.0078147156164055] (n = 27) (mean = .4074074074074074)
+Bin #12: (.0078147156164055,.008525144308806] (n = 38) (mean = .3552631578947368)
+Bin #13: (.008525144308806,.0092355730012065] (n = 20) (mean = .425)
+Bin #14: (.0092355730012065,.009946001693607] (n = 34) (mean = .4264705882352941)
+Bin #15: (.009946001693607,.0106564303860075] (n = 29) (mean = .4310344827586207)
+Bin #16: (.0106564303860075,.011366859078408] (n = 27) (mean = .3333333333333333)
+Bin #17: (.011366859078408,.0120772877708085] (n = 33) (mean = .3484848484848485)
+Bin #18: (.0120772877708085,.012787716463209] (n = 26) (mean = .3269230769230769)
+Bin #19: (.012787716463209,.0134981451556095] (n = 37) (mean = .3783783783783784)
+Bin #20: (.0134981451556095,.01420857384801] (n = 23) (mean = .2391304347826087)
+Bin #21: (.01420857384801,.0149190025404105] (n = 22) (mean = .25)
+Bin #22: (.0149190025404105,.015629431232811] (n = 41) (mean = .3536585365853658)
+Bin #23: (.015629431232811,.0163398599252115] (n = 23) (mean = .4130434782608696)
+Bin #24: (.0163398599252115,.017050288617612] (n = 24) (mean = .4375)
+Bin #25: (.017050288617612,.0177607173100125] (n = 34) (mean = .3235294117647059)
+Bin #26: (.0177607173100125,.018471146002413] (n = 45) (mean = .3777777777777778)
+Bin #27: (.018471146002413,.0191815746948135] (n = 40) (mean = .3375)
+Bin #28: (.0191815746948135,.0198920033872128] (n = 15) (mean = .3)
+
+. 
+. reg pride treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02, robust
+
+Linear regression                               Number of obs     =      2,001
+                                                F(3, 1997)        =       3.78
+                                                Prob > F          =     0.0101
+                                                R-squared         =     0.0056
+                                                Root MSE          =     .24864
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+            pride | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .0535175   .0228277     2.34   0.019     .0087489     .098286
+        ind_reest |   .3064725   1.533882     0.20   0.842    -2.701704    3.314649
+                  |
+treat#c.ind_reest |
+               1  |   1.159779    1.96034     0.59   0.554    -2.684747    5.004305
+                  |
+            _cons |   .7831349   .0179326    43.67   0.000     .7479663    .8183035
+-----------------------------------------------------------------------------------
+
+. outreg2 using results_extra.tex, append
+results_extra.tex
+dir : seeout
+
+. 
+. /* Having an income prediction score below the threshold predicts pride. 
+> Coefficient is positive (0.053) and significant at 5% (p-value = 0.019). */
+. 
+. cmogram pride ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatter line(0) 
+> lfitci
+
+Plotting mean of pride, conditional on ind_reest.
+
+n = 2001
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 47) (mean = .8723404299705586)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 22) (mean = .7727272808551788)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 41) (mean = .7642276512413491)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 45) (mean = .8370370441012912)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 26) (mean = .8076923157160099)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .8030303127386353)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 54) (mean = .8333333416117562)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 42) (mean = .7698412778831664)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 52) (mean = .820512827199239)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 44) (mean = .7878787964582443)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 36) (mean = .8796296368042628)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 40) (mean = .8166666731238366)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 30) (mean = .8222222288449605)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 36) (mean = .8055555638339784)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 39) (mean = .7863247944758489)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .8717948779081687)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 20) (mean = .8500000059604644)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 43) (mean = .759689929180367)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 31) (mean = .8387096851102768)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 24) (mean = .8055555609365305)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 52) (mean = .7884615464852407)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 26) (mean = .8717948782902497)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 48) (mean = .8750000062088171)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 33) (mean = .8181818254066237)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 45) (mean = .7259259363015492)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8709677477036754)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .8425925986634361)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 56) (mean = .9166666711015361)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 54) (mean = .8148148225413429)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .8095238166196006)
+Bin #1: [0,.0006859311512832] (n = 27) (mean = .7901234637807917)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 25) (mean = .7466666769981384)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 31) (mean = .7849462464932473)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8717948782902497)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7536231979079868)
+Bin #6: (.003429655756416,.0041155869076992] (n = 15) (mean = .8000000099341075)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 33) (mean = .777777786507751)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 31) (mean = .7526881819771182)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 32) (mean = .8125000074505806)
+Bin #10: (.0061733803615488,.006859311512832] (n = 33) (mean = .787878796006694)
+Bin #11: (.006859311512832,.0075452426641152] (n = 23) (mean = .8695652225743169)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 35) (mean = .7428571488176073)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 39) (mean = .743589753523851)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 28) (mean = .7857142921004977)
+Bin #15: (.0096030361179648,.010288967269248] (n = 26) (mean = .7692307761082282)
+Bin #16: (.010288967269248,.0109748984205312] (n = 29) (mean = .8390804662786681)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 33) (mean = .7979798064087377)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 29) (mean = .7471264456880504)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .7179487278828254)
+Bin #20: (.0130326918743808,.013718623025664] (n = 34) (mean = .833333341514363)
+Bin #21: (.013718623025664,.0144045541769472] (n = 18) (mean = .7407407512267431)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7941176540711347)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 33) (mean = .8080808168107813)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 29) (mean = .8390804673063343)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .6527777860562006)
+Bin #26: (.01714827878208,.0178342099333632] (n = 26) (mean = .8333333421211976)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .7986111175268888)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 42) (mean = .8015873084465662)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .7777777860562006)
+
+. 
+. reg interest_politics treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02, robust
+
+Linear regression                               Number of obs     =      2,045
+                                                F(3, 2041)        =       3.65
+                                                Prob > F          =     0.0121
+                                                R-squared         =     0.0052
+                                                Root MSE          =     .31612
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+interest_politics | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .0564206   .0282056     2.00   0.046     .0011059    .1117353
+        ind_reest |   1.202902   1.849617     0.65   0.516    -2.424431    4.830235
+                  |
+treat#c.ind_reest |
+               1  |   -1.30272    2.44377    -0.53   0.594    -6.095263    3.489822
+                  |
+            _cons |   .1902061   .0210368     9.04   0.000     .1489503    .2314619
+-----------------------------------------------------------------------------------
+
+. outreg2 using results_extra.tex, append
+results_extra.tex
+dir : seeout
+
+. 
+. /* Having an income prediction score below the threshold predicts interest in politi
+> cs. 
+> Coefficient is positive (0.056) and significant at 5% (p-value = 0.046). */ 
+. 
+. cmogram interest_politics ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scat
+> ter line(0) lfitci
+
+Plotting mean of interest_politics, conditional on ind_reest.
+
+n = 2045
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 47) (mean = .2198581613124685)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .2608695729919102)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 43) (mean = .1395348871863166)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 45) (mean = .3333333412806193)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 27) (mean = .1728395102200685)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 45) (mean = .2148148198922475)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 54) (mean = .2716049436065886)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .2248062082501345)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 52) (mean = .2692307755351067)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 44) (mean = .2272727326913313)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 37) (mean = .3243243315735379)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 40) (mean = .2833333380520344)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .3118279653210794)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 37) (mean = .2612612682419854)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .2682926887419166)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .316239323371496)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 20) (mean = .2166666686534882)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 44) (mean = .2575757625428113)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 31) (mean = .2150537698499618)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 26) (mean = .1794871836900711)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 52) (mean = .3269230838005359)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 25) (mean = .2400000071525574)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 50) (mean = .2600000059604645)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 35) (mean = .228571434531893)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 47) (mean = .1985815655677877)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 33) (mean = .1717171750285409)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .2037037097745472)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 56) (mean = .2083333384777818)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 53) (mean = .2452830250533122)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .4285714413438524)
+Bin #1: [0,.0006859311512832] (n = 28) (mean = .2738095298409462)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 25) (mean = .146666669845581)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .1666666697710752)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .1410256452285326)
+Bin #5: (.0027437246051328,.003429655756416] (n = 25) (mean = .2400000059604645)
+Bin #6: (.003429655756416,.0041155869076992] (n = 17) (mean = .3333333397612852)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 34) (mean = .1470588261590284)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 31) (mean = .150537637933608)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .2352941229062922)
+Bin #10: (.0061733803615488,.006859311512832] (n = 33) (mean = .1919191967357289)
+Bin #11: (.006859311512832,.0075452426641152] (n = 23) (mean = .1739130486612735)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 36) (mean = .1111111144224803)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 41) (mean = .2520325256556999)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 28) (mean = .1428571460502488)
+Bin #15: (.0096030361179648,.010288967269248] (n = 26) (mean = .192307696892665)
+Bin #16: (.010288967269248,.0109748984205312] (n = 29) (mean = .2183908111062543)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 35) (mean = .2666666729109628)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 31) (mean = .2150537679272313)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 27) (mean = .1975308678768299)
+Bin #20: (.0130326918743808,.013718623025664] (n = 34) (mean = .1862745153553346)
+Bin #21: (.013718623025664,.0144045541769472] (n = 18) (mean = .2592592653301027)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .2450980447670993)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 33) (mean = .1919191976388296)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 30) (mean = .2444444487492244)
+Bin #25: (.0164623476307968,.01714827878208] (n = 25) (mean = .2000000047683716)
+Bin #26: (.01714827878208,.0178342099333632] (n = 29) (mean = .1839080504302321)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 50) (mean = .2066666704416275)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 42) (mean = .1746031776780174)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .2777777827448315)
+
+. 
+. /* Question 4 
+> 
+> Replicate Q3 by running "donut hole regressions".  Explain why one might need a donu
+> t hole regression? */
+. 
+. /* To run a "donut hole regression" I have to DROP the units around the cutoff. */ 
+. 
+. gen donut = 0 
+
+. replace donut = 1 if ind_reest>-0.005 & ind_reest<0.005
+(751 real changes made)
+
+. 
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.02 & donut=
+> =0, robust
+
+Linear regression                               Number of obs     =      1,600
+                                                F(3, 1596)        =      28.10
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0536
+                                                Root MSE          =     .28219
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1157161   .0453327     2.55   0.011     .0267983    .2046339
+        ind_reest |   .8539822   2.999224     0.28   0.776    -5.028849    6.736814
+                  |
+treat#c.ind_reest |
+               1  |  -3.193804   3.409868    -0.94   0.349    -9.882095    3.494487
+                  |
+            _cons |   .7602738   .0393662    19.31   0.000      .683059    .8374885
+-----------------------------------------------------------------------------------
+
+. outreg2 using results_donuthole.tex, replace
+results_donuthole.tex
+dir : seeout
+
+. 
+. /* Doing a donut hole regression means that we are removing observations very close 
+> to the cut-off. 
+> We are doing this because it would be reasonable to assume that people have motivati
+> on to manipulate 
+> their income prediction score to be below of the threshold and benefit from the poli
+> cy. 
+> However, the threshold was not public during the PANES program and households were n
+> ot aware of
+> the calculation behind the prediction income score, so one could argue that househol
+> ds were enable 
+> to manipulate information to control the side they would fall in. 
+> Nevertheless, with the Donut Hole regression, the "treat" variable is still signific
+> ant at 5% (p-value = 0.011 < 0.05). The coefficient is positive (0.1157).
+> 
+> Which colum of the table 1 should be this result? 
+> It is not column 2 since the 0.11 porcentage points should come from a polynomial re
+> gression. */
+. 
+. reg support_gov_2007 treat##c.(ind_reest_sq) if ind_reest>=-.02 & ind_reest<=.02 & d
+> onut==0, robust
+
+Linear regression                               Number of obs     =      1,600
+                                                F(3, 1596)        =      27.39
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0532
+                                                Root MSE          =     .28225
+
+--------------------------------------------------------------------------------
+               |               Robust
+support_g~2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+---------------+----------------------------------------------------------------
+       1.treat |   .1532158    .051909     2.95   0.003     .0513987    .2550328
+  ind_reest_sq |   10.33189    46.0306     0.22   0.822    -79.95491    100.6187
+               |
+         treat#|
+c.ind_reest_sq |
+            1  |  -113.4053   112.5694    -1.01   0.314    -334.2046    107.3941
+               |
+         _cons |   .7598539   .0508408    14.95   0.000     .6601321    .8595757
+--------------------------------------------------------------------------------
+
+. 
+. /* Why we are not running this regression too? */
+. 
+. 
+. /* Question 5 come back 
+> 
+> Run local polynomials and explain why local polynomials might be needed after a donu
+> t hole. */
+. 
+. rdrobust support_gov_2007 ind_reest if donut==0, kernel(epanechnikov) masspoints(off
+> ) p(2) c(0)
+
+Sharp RD estimates using local polynomial regression.
+
+      Cutoff c = 0 | Left of c  Right of c            Number of obs =       1600
+-------------------+----------------------            BW type       =      mserd
+     Number of obs |       910         690            Kernel        = Epanechnikov
+Eff. Number of obs |       675         500            VCE method    =         NN
+    Order est. (p) |         2           2
+    Order bias (q) |         3           3
+       BW est. (h) |     0.016       0.016
+       BW bias (b) |     0.020       0.020
+         rho (h/b) |     0.801       0.801
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+--------------------------------------------------------------------------------
+            Method |   Coef.    Std. Err.    z     P>|z|    [95% Conf. Interval]
+-------------------+------------------------------------------------------------
+      Conventional |  -.6607     .23828   -2.7728  0.006   -1.12772     -.193688
+            Robust |     -          -     -2.1266  0.033   -1.87371     -.076391
+--------------------------------------------------------------------------------
+
+. outreg2 using results_poly.tex, replace
+results_poly.tex
+dir : seeout
+
+. 
+. /* Kernel(epanechnikov): The term "Epanechnikov" in the context of kernel functions 
+> refers to a specific type of kernel function that was introduced by the statistician
+>  and mathematician Gideon Epanechnikov. Its formula reflects the quadratic shape of 
+> the kernel function. It gives higher weight to observations close to the point of in
+> terest and gradually decreases the weight as the distance from the point of interest
+>  increases. */ 
+. 
+. rdrobust support_gov_2007 ind_reest if donut==0, kernel(uniform) masspoints(off) p(2
+> ) c(0)
+Not enough variability to compute the preliminary bandwidth. Try checking for mass poi
+> nts with option masspoints(check).
+
+Sharp RD estimates using local polynomial regression.
+
+      Cutoff c = 0 | Left of c  Right of c            Number of obs =       1600
+-------------------+----------------------            BW type       =      mserd
+     Number of obs |       910         690            Kernel        =    Uniform
+Eff. Number of obs |       910         690            VCE method    =         NN
+    Order est. (p) |         2           2
+    Order bias (q) |         3           3
+       BW est. (h) |     0.020       0.020
+       BW bias (b) |     0.020       0.020
+         rho (h/b) |     1.000       1.000
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+--------------------------------------------------------------------------------
+            Method |   Coef.    Std. Err.    z     P>|z|    [95% Conf. Interval]
+-------------------+------------------------------------------------------------
+      Conventional | -.32162     .13354   -2.4083  0.016   -.583359     -.059877
+            Robust |     -          -     -2.1686  0.030   -1.65454     -.083619
+--------------------------------------------------------------------------------
+
+. outreg2 using results_poly.tex, append
+results_poly.tex
+dir : seeout
+
+. 
+. /* The uniform kernel gives equal weight to all observations within the bandwidth ar
+> ound the cutoff. By using different kernels and excluding data points in the "donut 
+> hole" in the second command, these analyses assess the robustness of the RD results 
+> to different specifications and potential data manipulation around the cutoff.*/
+. 
+. /* What is the command "masspoints"?
+> 
+> Masspoints is telling Stata what to do when there are multiple observations with the
+>  same value in the running variable. Turning it off ensures that the presence of mul
+> tiple observations with the same value of the running variable (ind_reest) doesn't d
+> isproportionately affect the analysis.
+> 
+> How can I read these commands? I don't understand the table. 
+> 
+> - The coefficient is negative: the lower is your income predicted score, higher is y
+> our support for the government. Which makes sense with the paper: negative scores, w
+> hich are the eligible ones for the policy, are more likely to support the current go
+> vernment. 
+> 
+> Why change the kernel function? Which one is more usually used? */
+. 
+. /*Doing some graphs representation */ 
+. 
+. /* Main graph: visual representation of the paper */
+. 
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02 & donut==0, c
+> ut(0) scatter line(0) lfitci
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 1600
+
+Bin #1: [-.0199909936636686,-.0194741318740978] (n = 29) (mean = .9137931034482759)
+Bin #2: (-.0194741318740978,-.018957270084527] (n = 28) (mean = .9464285714285714)
+Bin #3: (-.018957270084527,-.0184404082949562] (n = 26) (mean = .9615384615384616)
+Bin #4: (-.0184404082949562,-.0179235465053854] (n = 42) (mean = .8690476190476191)
+Bin #5: (-.0179235465053854,-.0174066847158146] (n = 35) (mean = .9)
+Bin #6: (-.0174066847158146,-.0168898229262438] (n = 27) (mean = 1)
+Bin #7: (-.0168898229262438,-.016372961136673] (n = 14) (mean = .8928571428571429)
+Bin #8: (-.016372961136673,-.0158560993471022] (n = 58) (mean = .9137931034482759)
+Bin #9: (-.0158560993471022,-.0153392375575314] (n = 37) (mean = .9324324324324325)
+Bin #10: (-.0153392375575314,-.0148223757679606] (n = 35) (mean = .9285714285714286)
+Bin #11: (-.0148223757679606,-.0143055139783898] (n = 35) (mean = .9428571428571428)
+Bin #12: (-.0143055139783898,-.013788652188819] (n = 37) (mean = .9459459459459459)
+Bin #13: (-.013788652188819,-.0132717903992482] (n = 34) (mean = .9117647058823529)
+Bin #14: (-.0132717903992482,-.0127549286096774] (n = 29) (mean = .8448275862068966)
+Bin #15: (-.0127549286096774,-.0122380668201066] (n = 31) (mean = .9032258064516129)
+Bin #16: (-.0122380668201066,-.0117212050305358] (n = 22) (mean = .8181818181818182)
+Bin #17: (-.0117212050305358,-.011204343240965] (n = 31) (mean = .9032258064516129)
+Bin #18: (-.011204343240965,-.0106874814513942] (n = 33) (mean = .8787878787878788)
+Bin #19: (-.0106874814513942,-.0101706196618234] (n = 31) (mean = .7903225806451613)
+Bin #20: (-.0101706196618234,-.0096537578722526] (n = 31) (mean = .9032258064516129)
+Bin #21: (-.0096537578722526,-.0091368960826818] (n = 23) (mean = .9347826086956522)
+Bin #22: (-.0091368960826818,-.008620034293111] (n = 18) (mean = .8888888888888888)
+Bin #23: (-.008620034293111,-.0081031725035402] (n = 37) (mean = .8513513513513513)
+Bin #24: (-.0081031725035402,-.0075863107139694] (n = 24) (mean = .875)
+Bin #25: (-.0075863107139694,-.0070694489243986] (n = 19) (mean = .9210526315789473)
+Bin #26: (-.0070694489243986,-.0065525871348278] (n = 36) (mean = .8888888888888888)
+Bin #27: (-.0065525871348278,-.006035725345257] (n = 42) (mean = .9404761904761905)
+Bin #28: (-.006035725345257,-.0055188635556862] (n = 23) (mean = .9565217391304348)
+Bin #29: (-.0055188635556862,-.0050020017661154] (n = 42) (mean = .8928571428571429)
+Bin #1: [0,.0007650770533543] (n = 0) (mean = .)
+Bin #2: (.0007650770533543,.0015301541067086] (n = 0) (mean = .)
+Bin #3: (.0015301541067086,.0022952311600629] (n = 0) (mean = .)
+Bin #4: (.0022952311600629,.0030603082134172] (n = 0) (mean = .)
+Bin #5: (.0030603082134172,.0038253852667715] (n = 0) (mean = .)
+Bin #6: (.0038253852667715,.0045904623201258] (n = 0) (mean = .)
+Bin #7: (.0045904623201258,.0053555393734801] (n = 15) (mean = .7)
+Bin #8: (.0053555393734801,.0061206164268344] (n = 35) (mean = .8)
+Bin #9: (.0061206164268344,.0068856934801887] (n = 33) (mean = .6666666666666666)
+Bin #10: (.0068856934801887,.007650770533543] (n = 30) (mean = .7333333333333333)
+Bin #11: (.007650770533543,.0084158475868973] (n = 42) (mean = .75)
+Bin #12: (.0084158475868973,.0091809246402516] (n = 37) (mean = .8513513513513513)
+Bin #13: (.0091809246402516,.0099460016936059] (n = 40) (mean = .7875)
+Bin #14: (.0099460016936059,.0107110787469602] (n = 29) (mean = .7758620689655172)
+Bin #15: (.0107110787469602,.0114761558003145] (n = 34) (mean = .8235294117647058)
+Bin #16: (.0114761558003145,.0122412328536688] (n = 33) (mean = .8333333333333334)
+Bin #17: (.0122412328536688,.0130063099070231] (n = 34) (mean = .7941176470588235)
+Bin #18: (.0130063099070231,.0137713869603774] (n = 38) (mean = .7631578947368421)
+Bin #19: (.0137713869603774,.0145364640137317] (n = 27) (mean = .7037037037037037)
+Bin #20: (.0145364640137317,.015301541067086] (n = 37) (mean = .7027027027027027)
+Bin #21: (.015301541067086,.0160666181204403] (n = 37) (mean = .7972972972972973)
+Bin #22: (.0160666181204403,.0168316951737946] (n = 26) (mean = .8076923076923077)
+Bin #23: (.0168316951737946,.0175967722271489] (n = 36) (mean = .7638888888888888)
+Bin #24: (.0175967722271489,.0183618492805032] (n = 52) (mean = .8365384615384616)
+Bin #25: (.0183618492805032,.0191269263338575] (n = 55) (mean = .7272727272727273)
+Bin #26: (.0191269263338575,.0198920033872128] (n = 20) (mean = .725)
+
+. 
+. 
+. /* How can I read this graph below? */ 
+. 
+. twoway (scatter support_gov_2007 ind_reest, sort) if ind_reest>=-.02 & ind_reest<=.0
+> 2, ytitle(support_gov_2007) xtitle(ind_reest) xline(0) title(Scatter Plot) note(Cuto
+> ff is on 0)
+
+. 
+. binscatter support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02
+
+. 
+. /* Binscatter is a command that will plot the relationship between to variables.
+> The x-asis usually being a continuous variable divided into bins. 
+> The y-axis being the dependent variable presented in means. 
+> In this command in specific, the best line will be plot to visualisation of the rela
+> tionship.
+> As we can see here, the relationship between fovernment support and income score is 
+> negative. 
+> Lower is your income score, higher is your support for the current government. */
+. 
+. binscatter support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, line(qfit
+> ) by(treat)
+
+. 
+. /* With this command we can better visualize the descontinuity. 
+> It will plot a non-linear function to describe the relationship between variables, 
+> with the cut-off "treat". */
+. 
+. 
+. /* Question 6
+> 
+> Produce an RDplot and a cmogram with the original and expanded windows. Explain what
+>  the respective graphs show. */ 
+. 
+. /* Let's first plot with the usual window of -0.02/+0.02. */
+. 
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatt
+> er line(0) lfitci 
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 2089
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 48) (mean = .9270833333333334)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .9565217391304348)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 44) (mean = .8863636363636364)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 47) (mean = .9042553191489362)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 28) (mean = .9821428571428571)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .9090909090909091)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 55) (mean = .9272727272727272)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .9302325581395349)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 49) (mean = .9183673469387755)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 46) (mean = .9565217391304348)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 39) (mean = .8589743589743589)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 38) (mean = .8947368421052632)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .8548387096774194)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 41) (mean = .8780487804878049)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .8170731707317073)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .9230769230769231)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 22) (mean = .8863636363636364)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 45) (mean = .8666666666666667)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .9)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 27) (mean = .8888888888888888)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 58) (mean = .9137931034482759)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 28) (mean = .9821428571428571)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 56) (mean = .8928571428571429)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 32) (mean = .953125)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 50) (mean = .83)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8870967741935484)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .9027777777777778)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 65) (mean = .9)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 49) (mean = .8673469387755102)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .9285714285714286)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = .7413793103448276)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 22) (mean = .8181818181818182)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .796875)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8461538461538461)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7608695652173914)
+Bin #6: (.003429655756416,.0041155869076992] (n = 16) (mean = .75)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = .7027027027027027)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 34) (mean = .7794117647058824)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .7794117647058824)
+Bin #10: (.0061733803615488,.006859311512832] (n = 28) (mean = .6785714285714286)
+Bin #11: (.006859311512832,.0075452426641152] (n = 26) (mean = .7115384615384616)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 38) (mean = .7631578947368421)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 40) (mean = .8375)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 29) (mean = .7931034482758621)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = .7321428571428571)
+Bin #16: (.010288967269248,.0109748984205312] (n = 30) (mean = .8166666666666667)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 31) (mean = .8225806451612904)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 33) (mean = .803030303030303)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .8076923076923077)
+Bin #20: (.0130326918743808,.013718623025664] (n = 37) (mean = .7837837837837838)
+Bin #21: (.013718623025664,.0144045541769472] (n = 19) (mean = .6842105263157895)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7647058823529411)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = .6944444444444444)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 31) (mean = .8064516129032258)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .7708333333333334)
+Bin #26: (.01714827878208,.0178342099333632] (n = 31) (mean = .7580645161290323)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .8645833333333334)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 49) (mean = .7142857142857143)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .75)
+
+. * Plot the best flat line, with the treatment being below 0 and non-treatment above 
+> 0. 
+. * There ir no donut hole aqui, why? 
+. 
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, cut(0) scatt
+> er line(0) qfitci 
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 2089
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 48) (mean = .9270833333333334)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .9565217391304348)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 44) (mean = .8863636363636364)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 47) (mean = .9042553191489362)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 28) (mean = .9821428571428571)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .9090909090909091)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 55) (mean = .9272727272727272)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .9302325581395349)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 49) (mean = .9183673469387755)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 46) (mean = .9565217391304348)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 39) (mean = .8589743589743589)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 38) (mean = .8947368421052632)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .8548387096774194)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 41) (mean = .8780487804878049)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .8170731707317073)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .9230769230769231)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 22) (mean = .8863636363636364)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 45) (mean = .8666666666666667)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .9)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 27) (mean = .8888888888888888)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 58) (mean = .9137931034482759)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 28) (mean = .9821428571428571)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 56) (mean = .8928571428571429)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 32) (mean = .953125)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 50) (mean = .83)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8870967741935484)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .9027777777777778)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 65) (mean = .9)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 49) (mean = .8673469387755102)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .9285714285714286)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = .7413793103448276)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 22) (mean = .8181818181818182)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .796875)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8461538461538461)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7608695652173914)
+Bin #6: (.003429655756416,.0041155869076992] (n = 16) (mean = .75)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = .7027027027027027)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 34) (mean = .7794117647058824)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .7794117647058824)
+Bin #10: (.0061733803615488,.006859311512832] (n = 28) (mean = .6785714285714286)
+Bin #11: (.006859311512832,.0075452426641152] (n = 26) (mean = .7115384615384616)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 38) (mean = .7631578947368421)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 40) (mean = .8375)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 29) (mean = .7931034482758621)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = .7321428571428571)
+Bin #16: (.010288967269248,.0109748984205312] (n = 30) (mean = .8166666666666667)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 31) (mean = .8225806451612904)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 33) (mean = .803030303030303)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .8076923076923077)
+Bin #20: (.0130326918743808,.013718623025664] (n = 37) (mean = .7837837837837838)
+Bin #21: (.013718623025664,.0144045541769472] (n = 19) (mean = .6842105263157895)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7647058823529411)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = .6944444444444444)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 31) (mean = .8064516129032258)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .7708333333333334)
+Bin #26: (.01714827878208,.0178342099333632] (n = 31) (mean = .7580645161290323)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .8645833333333334)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 49) (mean = .7142857142857143)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .75)
+
+. * Plot a non-linear curve, with the treatment being below 0 and non-treatment above 
+> 0. 
+. * This looks more adjusted to the data. 
+. 
+. /* Nevertheless, in both graphs we can see that lower predicted income scores are re
+> lated to higher support for the government in 2007, which is the year of execution o
+> f the policy. Above the threshold, support decreases. */
+. 
+. rdplot support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, binselect(qs)
+>  p(1) masspoints(off) c(0) graph_options(title(Government support and Predicted Inco
+> me))
+
+RD Plot with quantile spaced number of bins using spacings estimators.
+
+         Cutoff c = 0 | Left of c  Right of c        Number of obs  =       2089
+----------------------+----------------------        Kernel         =    Uniform
+        Number of obs |      1200         889
+   Eff. Number of obs |      1199         889
+  Order poly. fit (p) |         1           1
+     BW poly. fit (h) |     0.020       0.020
+ Number of bins scale |     1.000       1.000
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+---------------------------------------------
+                      | Left of c  Right of c
+----------------------+----------------------
+        Bins selected |         6           4
+   Average bin length |     0.003       0.005
+    Median bin length |     0.003       0.005
+----------------------+----------------------
+    IMSE-optimal bins |         6           4
+  Mimicking Var. bins |        35          37
+----------------------+----------------------
+Rel. to IMSE-optimal: | 
+        Implied scale |     1.000       1.000
+    WIMSE var. weight |     0.500       0.500
+    WIMSE bias weight |     0.500       0.500
+---------------------------------------------
+
+
+. 
+. /* RD plot is a command for creating a regression-discontinuity plot.
+> - binselect(qs): This option specifies the method for selecting the number of bins i
+> n the RD plot. In this case, it's using the "quadratic-spline" method. 
+> - p(1): This option sets the order of the polynomial used for local linear fitting. 
+> In this case, it's using a first-degree polynomial.
+> - c(0): This option sets the continuity correction for local linear fitting to zero.
+> */
+. 
+. rdplot support_gov_2007 ind_reest if ind_reest>=-.02 & ind_reest<=.02, binselect(qs)
+>  p(2) masspoints(off) c(0) graph_options(title(Government support and Predicted Inco
+> me))
+
+RD Plot with quantile spaced number of bins using spacings estimators.
+
+         Cutoff c = 0 | Left of c  Right of c        Number of obs  =       2089
+----------------------+----------------------        Kernel         =    Uniform
+        Number of obs |      1200         889
+   Eff. Number of obs |      1199         889
+  Order poly. fit (p) |         2           2
+     BW poly. fit (h) |     0.020       0.020
+ Number of bins scale |     1.000       1.000
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+---------------------------------------------
+                      | Left of c  Right of c
+----------------------+----------------------
+        Bins selected |         6           4
+   Average bin length |     0.003       0.005
+    Median bin length |     0.003       0.005
+----------------------+----------------------
+    IMSE-optimal bins |         6           4
+  Mimicking Var. bins |        35          37
+----------------------+----------------------
+Rel. to IMSE-optimal: | 
+        Implied scale |     1.000       1.000
+    WIMSE var. weight |     0.500       0.500
+    WIMSE bias weight |     0.500       0.500
+---------------------------------------------
+
+
+. 
+. * This command is fitting a curve to the data instead of a line. 
+. 
+. /* Main conclusion: in both commands (cmogram and rdplot) we can see that there is a
+>  discontinuity around the cut-off (support for the government decreases drastically 
+> with higher predicted income levels). Second-order polynomial appears to fit better 
+> the data than first-order polynomial. 
+> In this way, people who were eligi for PANES (with income levels below 0), are more 
+> likely to support the current government in 2007, year of the execution of the polic
+> y. */
+. 
+. * Let's now plot with the expanded window. 
+. 
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.03 & ind_reest<=.03, cut(0) scatt
+> er line(0) lfitci 
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 2089
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 48) (mean = .9270833333333334)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .9565217391304348)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 44) (mean = .8863636363636364)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 47) (mean = .9042553191489362)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 28) (mean = .9821428571428571)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .9090909090909091)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 55) (mean = .9272727272727272)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .9302325581395349)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 49) (mean = .9183673469387755)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 46) (mean = .9565217391304348)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 39) (mean = .8589743589743589)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 38) (mean = .8947368421052632)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .8548387096774194)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 41) (mean = .8780487804878049)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .8170731707317073)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .9230769230769231)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 22) (mean = .8863636363636364)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 45) (mean = .8666666666666667)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .9)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 27) (mean = .8888888888888888)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 58) (mean = .9137931034482759)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 28) (mean = .9821428571428571)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 56) (mean = .8928571428571429)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 32) (mean = .953125)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 50) (mean = .83)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8870967741935484)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .9027777777777778)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 65) (mean = .9)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 49) (mean = .8673469387755102)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .9285714285714286)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = .7413793103448276)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 22) (mean = .8181818181818182)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .796875)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8461538461538461)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7608695652173914)
+Bin #6: (.003429655756416,.0041155869076992] (n = 16) (mean = .75)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = .7027027027027027)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 34) (mean = .7794117647058824)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .7794117647058824)
+Bin #10: (.0061733803615488,.006859311512832] (n = 28) (mean = .6785714285714286)
+Bin #11: (.006859311512832,.0075452426641152] (n = 26) (mean = .7115384615384616)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 38) (mean = .7631578947368421)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 40) (mean = .8375)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 29) (mean = .7931034482758621)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = .7321428571428571)
+Bin #16: (.010288967269248,.0109748984205312] (n = 30) (mean = .8166666666666667)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 31) (mean = .8225806451612904)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 33) (mean = .803030303030303)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .8076923076923077)
+Bin #20: (.0130326918743808,.013718623025664] (n = 37) (mean = .7837837837837838)
+Bin #21: (.013718623025664,.0144045541769472] (n = 19) (mean = .6842105263157895)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7647058823529411)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = .6944444444444444)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 31) (mean = .8064516129032258)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .7708333333333334)
+Bin #26: (.01714827878208,.0178342099333632] (n = 31) (mean = .7580645161290323)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .8645833333333334)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 49) (mean = .7142857142857143)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .75)
+
+. count if ind_reest >= -0.03 & ind_reest <= 0.03
+  3,098
+
+. count if ind_reest >= -0.02 & ind_reest <= 0.02
+  3,098
+
+. cmogram support_gov_2007 ind_reest if ind_reest>=-.03 & ind_reest<=.03, cut(0) scatt
+> er line(0) qfitci
+
+Plotting mean of support_gov_2007, conditional on ind_reest.
+
+n = 2089
+
+Bin #1: [-.0199909936636686,-.0193332938622916] (n = 48) (mean = .9270833333333334)
+Bin #2: (-.0193332938622916,-.0186755940609146] (n = 23) (mean = .9565217391304348)
+Bin #3: (-.0186755940609146,-.0180178942595376] (n = 44) (mean = .8863636363636364)
+Bin #4: (-.0180178942595376,-.0173601944581606] (n = 47) (mean = .9042553191489362)
+Bin #5: (-.0173601944581606,-.0167024946567836] (n = 28) (mean = .9821428571428571)
+Bin #6: (-.0167024946567836,-.0160447948554066] (n = 44) (mean = .9090909090909091)
+Bin #7: (-.0160447948554066,-.0153870950540296] (n = 55) (mean = .9272727272727272)
+Bin #8: (-.0153870950540296,-.0147293952526526] (n = 43) (mean = .9302325581395349)
+Bin #9: (-.0147293952526526,-.0140716954512756] (n = 49) (mean = .9183673469387755)
+Bin #10: (-.0140716954512756,-.0134139956498986] (n = 46) (mean = .9565217391304348)
+Bin #11: (-.0134139956498986,-.0127562958485216] (n = 39) (mean = .8589743589743589)
+Bin #12: (-.0127562958485216,-.0120985960471446] (n = 38) (mean = .8947368421052632)
+Bin #13: (-.0120985960471446,-.0114408962457676] (n = 31) (mean = .8548387096774194)
+Bin #14: (-.0114408962457676,-.0107831964443906] (n = 41) (mean = .8780487804878049)
+Bin #15: (-.0107831964443906,-.0101254966430136] (n = 41) (mean = .8170731707317073)
+Bin #16: (-.0101254966430136,-.0094677968416366] (n = 39) (mean = .9230769230769231)
+Bin #17: (-.0094677968416366,-.0088100970402596] (n = 22) (mean = .8863636363636364)
+Bin #18: (-.0088100970402596,-.0081523972388826] (n = 45) (mean = .8666666666666667)
+Bin #19: (-.0081523972388826,-.0074946974375056] (n = 30) (mean = .9)
+Bin #20: (-.0074946974375056,-.0068369976361286] (n = 27) (mean = .8888888888888888)
+Bin #21: (-.0068369976361286,-.0061792978347516] (n = 58) (mean = .9137931034482759)
+Bin #22: (-.0061792978347516,-.0055215980333746] (n = 28) (mean = .9821428571428571)
+Bin #23: (-.0055215980333746,-.0048638982319976] (n = 56) (mean = .8928571428571429)
+Bin #24: (-.0048638982319976,-.0042061984306206] (n = 32) (mean = .953125)
+Bin #25: (-.0042061984306206,-.0035484986292436] (n = 50) (mean = .83)
+Bin #26: (-.0035484986292436,-.0028907988278666] (n = 31) (mean = .8870967741935484)
+Bin #27: (-.0028907988278666,-.0022330990264896] (n = 36) (mean = .9027777777777778)
+Bin #28: (-.0022330990264896,-.0015753992251126] (n = 65) (mean = .9)
+Bin #29: (-.0015753992251126,-.0009176994237356] (n = 49) (mean = .8673469387755102)
+Bin #30: (-.0009176994237356,-.000259999622358] (n = 14) (mean = .9285714285714286)
+Bin #1: [0,.0006859311512832] (n = 29) (mean = .7413793103448276)
+Bin #2: (.0006859311512832,.0013718623025664] (n = 22) (mean = .8181818181818182)
+Bin #3: (.0013718623025664,.0020577934538496] (n = 32) (mean = .796875)
+Bin #4: (.0020577934538496,.0027437246051328] (n = 26) (mean = .8461538461538461)
+Bin #5: (.0027437246051328,.003429655756416] (n = 23) (mean = .7608695652173914)
+Bin #6: (.003429655756416,.0041155869076992] (n = 16) (mean = .75)
+Bin #7: (.0041155869076992,.0048015180589824] (n = 37) (mean = .7027027027027027)
+Bin #8: (.0048015180589824,.0054874492102656] (n = 34) (mean = .7794117647058824)
+Bin #9: (.0054874492102656,.0061733803615488] (n = 34) (mean = .7794117647058824)
+Bin #10: (.0061733803615488,.006859311512832] (n = 28) (mean = .6785714285714286)
+Bin #11: (.006859311512832,.0075452426641152] (n = 26) (mean = .7115384615384616)
+Bin #12: (.0075452426641152,.0082311738153984] (n = 38) (mean = .7631578947368421)
+Bin #13: (.0082311738153984,.0089171049666816] (n = 40) (mean = .8375)
+Bin #14: (.0089171049666816,.0096030361179648] (n = 29) (mean = .7931034482758621)
+Bin #15: (.0096030361179648,.010288967269248] (n = 28) (mean = .7321428571428571)
+Bin #16: (.010288967269248,.0109748984205312] (n = 30) (mean = .8166666666666667)
+Bin #17: (.0109748984205312,.0116608295718144] (n = 31) (mean = .8225806451612904)
+Bin #18: (.0116608295718144,.0123467607230976] (n = 33) (mean = .803030303030303)
+Bin #19: (.0123467607230976,.0130326918743808] (n = 26) (mean = .8076923076923077)
+Bin #20: (.0130326918743808,.013718623025664] (n = 37) (mean = .7837837837837838)
+Bin #21: (.013718623025664,.0144045541769472] (n = 19) (mean = .6842105263157895)
+Bin #22: (.0144045541769472,.0150904853282304] (n = 34) (mean = .7647058823529411)
+Bin #23: (.0150904853282304,.0157764164795136] (n = 36) (mean = .6944444444444444)
+Bin #24: (.0157764164795136,.0164623476307968] (n = 31) (mean = .8064516129032258)
+Bin #25: (.0164623476307968,.01714827878208] (n = 24) (mean = .7708333333333334)
+Bin #26: (.01714827878208,.0178342099333632] (n = 31) (mean = .7580645161290323)
+Bin #27: (.0178342099333632,.0185201410846464] (n = 48) (mean = .8645833333333334)
+Bin #28: (.0185201410846464,.0192060722359296] (n = 49) (mean = .7142857142857143)
+Bin #29: (.0192060722359296,.0198920033872128] (n = 18) (mean = .75)
+
+. 
+. rdplot support_gov_2007 ind_reest if ind_reest>=-.03 & ind_reest<=.03, binselect(qs)
+>  p(1) masspoints(off) c(0) graph_options(title(Government support and Predicted Inco
+> me))
+
+RD Plot with quantile spaced number of bins using spacings estimators.
+
+         Cutoff c = 0 | Left of c  Right of c        Number of obs  =       2089
+----------------------+----------------------        Kernel         =    Uniform
+        Number of obs |      1200         889
+   Eff. Number of obs |      1199         889
+  Order poly. fit (p) |         1           1
+     BW poly. fit (h) |     0.020       0.020
+ Number of bins scale |     1.000       1.000
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+---------------------------------------------
+                      | Left of c  Right of c
+----------------------+----------------------
+        Bins selected |         6           4
+   Average bin length |     0.003       0.005
+    Median bin length |     0.003       0.005
+----------------------+----------------------
+    IMSE-optimal bins |         6           4
+  Mimicking Var. bins |        35          37
+----------------------+----------------------
+Rel. to IMSE-optimal: | 
+        Implied scale |     1.000       1.000
+    WIMSE var. weight |     0.500       0.500
+    WIMSE bias weight |     0.500       0.500
+---------------------------------------------
+
+
+. 
+. rdplot support_gov_2007 ind_reest if ind_reest>=-.03 & ind_reest<=.03, binselect(qs)
+>  p(2) masspoints(off) c(0) graph_options(title(Government support and Predicted Inco
+> me))
+
+RD Plot with quantile spaced number of bins using spacings estimators.
+
+         Cutoff c = 0 | Left of c  Right of c        Number of obs  =       2089
+----------------------+----------------------        Kernel         =    Uniform
+        Number of obs |      1200         889
+   Eff. Number of obs |      1199         889
+  Order poly. fit (p) |         2           2
+     BW poly. fit (h) |     0.020       0.020
+ Number of bins scale |     1.000       1.000
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+---------------------------------------------
+                      | Left of c  Right of c
+----------------------+----------------------
+        Bins selected |         6           4
+   Average bin length |     0.003       0.005
+    Median bin length |     0.003       0.005
+----------------------+----------------------
+    IMSE-optimal bins |         6           4
+  Mimicking Var. bins |        35          37
+----------------------+----------------------
+Rel. to IMSE-optimal: | 
+        Implied scale |     1.000       1.000
+    WIMSE var. weight |     0.500       0.500
+    WIMSE bias weight |     0.500       0.500
+---------------------------------------------
+
+
+. 
+. /* Q6: This basically prompts you to produce cmograms and RDplots for an asymmetric 
+> bandwidth. Any ideas why would the bandwidth be asymmetric in this case? */ 
+. 
+. * narrowing 0.05, negative side
+. 
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.015 & ind_reest<=.02 & donut
+> ==0, robust
+
+Linear regression                               Number of obs     =      1,279
+                                                F(3, 1275)        =      19.59
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0417
+                                                Root MSE          =     .29854
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1386751   .0499589     2.78   0.006     .0406643    .2366858
+        ind_reest |   .8539822   3.000167     0.28   0.776    -5.031825     6.73979
+                  |
+treat#c.ind_reest |
+               1  |  -.5185966   4.229325    -0.12   0.902    -8.815797    7.778604
+                  |
+            _cons |   .7602738   .0393785    19.31   0.000     .6830199    .8375276
+-----------------------------------------------------------------------------------
+
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.015 & ind_reest<=.02, robust
+
+Linear regression                               Number of obs     =      1,768
+                                                F(3, 1764)        =      25.76
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0417
+                                                Root MSE          =     .29153
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1178094   .0275128     4.28   0.000     .0638482    .1717705
+        ind_reest |  -.0108374   1.938655    -0.01   0.996    -3.813141    3.791466
+                  |
+treat#c.ind_reest |
+               1  |   -.447773    2.70497    -0.17   0.869    -5.753057    4.857511
+                  |
+            _cons |    .772328   .0221437    34.88   0.000     .7288974    .8157587
+-----------------------------------------------------------------------------------
+
+. outreg2 using narrowwind_015.tex, replace
+narrowwind_015.tex
+dir : seeout
+
+. 
+. * narrowing 0.05, positive side
+. 
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.015 & donut
+> ==0, robust
+
+Linear regression                               Number of obs     =      1,353
+                                                F(3, 1349)        =      20.34
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0530
+                                                Root MSE          =     .26698
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |    .147394   .0629313     2.34   0.019     .0239401    .2708479
+        ind_reest |   4.512688   5.723734     0.79   0.431    -6.715698    15.74107
+                  |
+treat#c.ind_reest |
+               1  |   -6.85251   5.949302    -1.15   0.250     -18.5234    4.818379
+                  |
+            _cons |   .7285958   .0587773    12.40   0.000     .6132911    .8439006
+-----------------------------------------------------------------------------------
+
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.015, robust
+
+Linear regression                               Number of obs     =      1,842
+                                                F(3, 1838)        =      27.43
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0499
+                                                Root MSE          =     .26849
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1142315   .0291361     3.92   0.000     .0570882    .1713747
+        ind_reest |   .8395044   2.999106     0.28   0.780    -5.042509    6.721518
+                  |
+treat#c.ind_reest |
+               1  |  -2.765871   3.205326    -0.86   0.388    -9.052335    3.520593
+                  |
+            _cons |   .7677523   .0256183    29.97   0.000     .7175082    .8179964
+-----------------------------------------------------------------------------------
+
+. outreg2 using narrowwind_015.tex, append
+narrowwind_015.tex
+dir : seeout
+
+. 
+. * narrowing 0.01, negative side
+. 
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.01 & ind_reest<=.02 & donut=
+> =0, robust
+
+Linear regression                               Number of obs     =        974
+                                                F(3, 970)         =      18.60
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0386
+                                                Root MSE          =     .30895
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1630032   .0735728     2.22   0.027     .0186229    .3073835
+        ind_reest |   .8539822   3.001642     0.28   0.776    -5.036478    6.744443
+                  |
+treat#c.ind_reest |
+               1  |   1.416662   8.900725     0.16   0.874    -16.05023    18.88356
+                  |
+            _cons |   .7602738   .0393979    19.30   0.000     .6829588    .8375887
+-----------------------------------------------------------------------------------
+
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.01 & ind_reest<=.02, robust
+
+Linear regression                               Number of obs     =      1,463
+                                                F(3, 1459)        =      24.97
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0413
+                                                Root MSE          =     .29722
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |    .112767   .0306822     3.68   0.000      .052581    .1729529
+        ind_reest |  -.0108374   1.939114    -0.01   0.996    -3.814586    3.792911
+                  |
+treat#c.ind_reest |
+               1  |  -2.595219   4.094259    -0.63   0.526    -10.62648    5.436043
+                  |
+            _cons |    .772328   .0221489    34.87   0.000     .7288809    .8157752
+-----------------------------------------------------------------------------------
+
+. outreg2 using narrowwind_01.tex, replace
+narrowwind_01.tex
+dir : seeout
+
+. 
+. * narrowing 0.01, positive side
+. 
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.01 & donut=
+> =0, robust
+
+Linear regression                               Number of obs     =      1,144
+                                                F(3, 1140)        =      13.95
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0521
+                                                Root MSE          =     .25426
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .2551676   .1205333     2.12   0.034     .0186755    .4916596
+        ind_reest |   18.78231     15.284     1.23   0.219    -11.20561    48.77023
+                  |
+treat#c.ind_reest |
+               1  |  -21.12213   15.36994    -1.37   0.170    -51.27867    9.034411
+                  |
+            _cons |   .6208222   .1184163     5.24   0.000     .3884839    .8531606
+-----------------------------------------------------------------------------------
+
+. reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.01, robust
+
+Linear regression                               Number of obs     =      1,633
+                                                F(3, 1629)        =      21.76
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.0495
+                                                Root MSE          =     .26004
+
+-----------------------------------------------------------------------------------
+                  |               Robust
+ support_gov_2007 | Coefficient  std. err.      t    P>|t|     [95% conf. interval]
+------------------+----------------------------------------------------------------
+          1.treat |   .1106162   .0333711     3.31   0.001     .0451614    .1760711
+        ind_reest |  -.4387757   5.175715    -0.08   0.932    -10.59053    9.712982
+                  |
+treat#c.ind_reest |
+               1  |  -1.487591   5.297911    -0.28   0.779    -11.87903    8.903845
+                  |
+            _cons |   .7713675   .0303475    25.42   0.000     .7118434    .8308917
+-----------------------------------------------------------------------------------
+
+. outreg2 using narrowwind_01.tex, append
+narrowwind_01.tex
+dir : seeout
+
+. 
+. log close
+      name:  <unnamed>
+       log:  /Users/medydcampos/Documents/LSE/AT/PB4A7 (Quantitative Applications)/Ass
+> ignments/assignment_final.log
+  log type:  text
+ closed on:  18 Jan 2024, 12:27:25
+--------------------------------------------------------------------------------------
