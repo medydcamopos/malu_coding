@@ -4,17 +4,6 @@ end of do-file
 
 . do "/var/folders/4g/6g4fqlm504q1dm_kjxcwwf0r0000gn/T//SD00268.000000"
 
-. clear all
-
-. 
-end of do-file
-
-. cd "/Users/medydcampos/Documents/LSE/AT/PB4A7 (Quantitative Applications)/Assignment
-> s"
-/Users/medydcampos/Documents/LSE/AT/PB4A7 (Quantitative Applications)/Assignments
-
-. do "/var/folders/4g/6g4fqlm504q1dm_kjxcwwf0r0000gn/T//SD00268.000000"
-
 . use reg_panes
 
 . 
@@ -2054,7 +2043,7 @@ Rel. to IMSE-optimal: |
 . /* Q6: This basically prompts you to produce cmograms and RDplots for an asymmetric 
 > bandwidth. Any ideas why would the bandwidth be asymmetric in this case? */ 
 . 
-. * narrowing 0.05, negative side
+. * [-0.015, 0.02]
 . 
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.015 & ind_reest<=.02 & donut
 > ==0, robust
@@ -2078,6 +2067,10 @@ treat#c.ind_reest |
             _cons |   .7602738   .0393785    19.31   0.000     .6830199    .8375276
 -----------------------------------------------------------------------------------
 
+. outreg2 using negative_narrowwind_015.tex, replace
+negative_narrowwind_015.tex
+dir : seeout
+
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.015 & ind_reest<=.02, robust
 
 Linear regression                               Number of obs     =      1,768
@@ -2099,12 +2092,12 @@ treat#c.ind_reest |
             _cons |    .772328   .0221437    34.88   0.000     .7288974    .8157587
 -----------------------------------------------------------------------------------
 
-. outreg2 using narrowwind_015.tex, replace
-narrowwind_015.tex
+. outreg2 using positive_narrowwind_015.tex, append
+positive_narrowwind_015.tex
 dir : seeout
 
 . 
-. * narrowing 0.05, positive side
+. * [-0.02, +0.015]
 . 
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.015 & donut
 > ==0, robust
@@ -2128,6 +2121,10 @@ treat#c.ind_reest |
             _cons |   .7285958   .0587773    12.40   0.000     .6132911    .8439006
 -----------------------------------------------------------------------------------
 
+. outreg2 using positive_narrowwind_015.tex, replace
+positive_narrowwind_015.tex
+dir : seeout
+
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.015, robust
 
 Linear regression                               Number of obs     =      1,842
@@ -2149,12 +2146,12 @@ treat#c.ind_reest |
             _cons |   .7677523   .0256183    29.97   0.000     .7175082    .8179964
 -----------------------------------------------------------------------------------
 
-. outreg2 using narrowwind_015.tex, append
-narrowwind_015.tex
+. outreg2 using positive_narrowwind_015.tex, append
+positive_narrowwind_015.tex
 dir : seeout
 
 . 
-. * narrowing 0.01, negative side
+. * [-0.01, +0.02]
 . 
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.01 & ind_reest<=.02 & donut=
 > =0, robust
@@ -2178,6 +2175,10 @@ treat#c.ind_reest |
             _cons |   .7602738   .0393979    19.30   0.000     .6829588    .8375887
 -----------------------------------------------------------------------------------
 
+. outreg2 using negative_narrowwind_01.tex, replace
+negative_narrowwind_01.tex
+dir : seeout
+
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.01 & ind_reest<=.02, robust
 
 Linear regression                               Number of obs     =      1,463
@@ -2199,12 +2200,12 @@ treat#c.ind_reest |
             _cons |    .772328   .0221489    34.87   0.000     .7288809    .8157752
 -----------------------------------------------------------------------------------
 
-. outreg2 using narrowwind_01.tex, replace
-narrowwind_01.tex
+. outreg2 using negative_narrowwind_01.tex, append
+negative_narrowwind_01.tex
 dir : seeout
 
 . 
-. * narrowing 0.01, positive side
+. * [-0.02, +0.01]
 . 
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.01 & donut=
 > =0, robust
@@ -2228,6 +2229,10 @@ treat#c.ind_reest |
             _cons |   .6208222   .1184163     5.24   0.000     .3884839    .8531606
 -----------------------------------------------------------------------------------
 
+. outreg2 using positive_narrowwind_01.tex, replace
+positive_narrowwind_01.tex
+dir : seeout
+
 . reg support_gov_2007 treat##c.ind_reest if ind_reest>=-.02 & ind_reest<=.01, robust
 
 Linear regression                               Number of obs     =      1,633
@@ -2249,8 +2254,8 @@ treat#c.ind_reest |
             _cons |   .7713675   .0303475    25.42   0.000     .7118434    .8308917
 -----------------------------------------------------------------------------------
 
-. outreg2 using narrowwind_01.tex, append
-narrowwind_01.tex
+. outreg2 using positive_narrowwind_01.tex, append
+positive_narrowwind_01.tex
 dir : seeout
 
 . 
@@ -2259,5 +2264,5 @@ dir : seeout
        log:  /Users/medydcampos/Documents/LSE/AT/PB4A7 (Quantitative Applications)/Ass
 > ignments/assignment_final.log
   log type:  text
- closed on:  18 Jan 2024, 12:27:25
+ closed on:  19 Jan 2024, 20:14:14
 --------------------------------------------------------------------------------------
