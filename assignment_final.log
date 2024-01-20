@@ -1434,6 +1434,32 @@ Outcome: support_gov_2007. Running variable: ind_reest.
             Robust |     -          -     -2.1266  0.033   -1.87371     -.076391
 --------------------------------------------------------------------------------
 
+. outreg2 using results_poly_donut.tex, replace
+results_poly_donut.tex
+dir : seeout
+
+. rdrobust support_gov_2007 ind_reest, kernel(epanechnikov) masspoints(off) p(2) c(0)
+
+Sharp RD estimates using local polynomial regression.
+
+      Cutoff c = 0 | Left of c  Right of c            Number of obs =       2089
+-------------------+----------------------            BW type       =      mserd
+     Number of obs |      1200         889            Kernel        = Epanechnikov
+Eff. Number of obs |       319         214            VCE method    =         NN
+    Order est. (p) |         2           2
+    Order bias (q) |         3           3
+       BW est. (h) |     0.005       0.005
+       BW bias (b) |     0.008       0.008
+         rho (h/b) |     0.631       0.631
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+--------------------------------------------------------------------------------
+            Method |   Coef.    Std. Err.    z     P>|z|    [95% Conf. Interval]
+-------------------+------------------------------------------------------------
+      Conventional | -.17704     .08758   -2.0214  0.043     -.3487     -.005383
+            Robust |     -          -     -2.0217  0.043   -.395302      -.00613
+--------------------------------------------------------------------------------
+
 . outreg2 using results_poly.tex, replace
 results_poly.tex
 dir : seeout
@@ -1469,6 +1495,32 @@ Outcome: support_gov_2007. Running variable: ind_reest.
 -------------------+------------------------------------------------------------
       Conventional | -.32162     .13354   -2.4083  0.016   -.583359     -.059877
             Robust |     -          -     -2.1686  0.030   -1.65454     -.083619
+--------------------------------------------------------------------------------
+
+. outreg2 using results_poly_donut.tex, append
+results_poly_donut.tex
+dir : seeout
+
+. rdrobust support_gov_2007 ind_reest, kernel(uniform) masspoints(off) p(2) c(0)
+
+Sharp RD estimates using local polynomial regression.
+
+      Cutoff c = 0 | Left of c  Right of c            Number of obs =       2089
+-------------------+----------------------            BW type       =      mserd
+     Number of obs |      1200         889            Kernel        =    Uniform
+Eff. Number of obs |       361         255            VCE method    =         NN
+    Order est. (p) |         2           2
+    Order bias (q) |         3           3
+       BW est. (h) |     0.006       0.006
+       BW bias (b) |     0.010       0.010
+         rho (h/b) |     0.612       0.612
+
+Outcome: support_gov_2007. Running variable: ind_reest.
+--------------------------------------------------------------------------------
+            Method |   Coef.    Std. Err.    z     P>|z|    [95% Conf. Interval]
+-------------------+------------------------------------------------------------
+      Conventional | -.15962     .07694   -2.0745  0.038   -.310421     -.008811
+            Robust |     -          -     -1.9560  0.050   -.339847      .000343
 --------------------------------------------------------------------------------
 
 . outreg2 using results_poly.tex, append
@@ -1770,7 +1822,7 @@ Outcome: support_gov_2007. Running variable: ind_reest.
     Median bin length |     0.003       0.005
 ----------------------+----------------------
     IMSE-optimal bins |         6           4
-  Mimicking Var. bins |        35          37
+  Mimicking Var. bins |        36          38
 ----------------------+----------------------
 Rel. to IMSE-optimal: | 
         Implied scale |     1.000       1.000
@@ -1811,7 +1863,7 @@ Outcome: support_gov_2007. Running variable: ind_reest.
     Median bin length |     0.003       0.005
 ----------------------+----------------------
     IMSE-optimal bins |         6           4
-  Mimicking Var. bins |        35          37
+  Mimicking Var. bins |        36          38
 ----------------------+----------------------
 Rel. to IMSE-optimal: | 
         Implied scale |     1.000       1.000
@@ -1997,7 +2049,7 @@ Outcome: support_gov_2007. Running variable: ind_reest.
     Median bin length |     0.003       0.005
 ----------------------+----------------------
     IMSE-optimal bins |         6           4
-  Mimicking Var. bins |        35          37
+  Mimicking Var. bins |        36          38
 ----------------------+----------------------
 Rel. to IMSE-optimal: | 
         Implied scale |     1.000       1.000
@@ -2030,7 +2082,7 @@ Outcome: support_gov_2007. Running variable: ind_reest.
     Median bin length |     0.003       0.005
 ----------------------+----------------------
     IMSE-optimal bins |         6           4
-  Mimicking Var. bins |        35          37
+  Mimicking Var. bins |        36          38
 ----------------------+----------------------
 Rel. to IMSE-optimal: | 
         Implied scale |     1.000       1.000
@@ -2264,5 +2316,5 @@ dir : seeout
        log:  /Users/medydcampos/Documents/LSE/AT/PB4A7 (Quantitative Applications)/Ass
 > ignments/assignment_final.log
   log type:  text
- closed on:  19 Jan 2024, 20:14:14
+ closed on:  20 Jan 2024, 15:48:07
 --------------------------------------------------------------------------------------
